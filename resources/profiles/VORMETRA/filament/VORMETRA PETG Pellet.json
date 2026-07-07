@@ -1,0 +1,67 @@
+{
+	"type": "filament",
+	"name": "VORMETRA PETG Pellet",
+	"inherits": "fdm_filament_common",
+	"from": "system",
+	"setting_id": "VORMETRA_PETG_pellet",
+	"instantiation": "true",
+	"filament_settings_id": [
+		"VORMETRA PETG Pellet"
+	],
+	"filament_vendor": [
+		"VORMETRA"
+	],
+	"filament_type": [
+		"PETG"
+	],
+	"filament_density": [
+		"1.27"
+	],
+	"filament_diameter": [
+		"1.12838"
+	],
+	"filament_max_volumetric_speed": [
+		"1015"
+	],
+	"nozzle_temperature_range_low": [
+		"230"
+	],
+	"nozzle_temperature_range_high": [
+		"250"
+	],
+	"nozzle_temperature": [
+		"240"
+	],
+	"nozzle_temperature_initial_layer": [
+		"245"
+	],
+	"hot_plate_temp": [
+		"0"
+	],
+	"hot_plate_temp_initial_layer": [
+		"0"
+	],
+	"enable_pressure_advance": [
+		"1"
+	],
+	"pressure_advance": [
+		"0.3"
+	],
+
+	"extruder_rotation_volume": "TBD",
+	"multi_zone_1_temperature": "TBD",
+	"multi_zone_1_initial_layer": "TBD",
+	"multi_zone_2_temperature": "TBD",
+	"multi_zone_2_initial_layer": "TBD",
+	"multi_zone_3_temperature": "TBD",
+	"multi_zone_3_initial_layer": "TBD",
+	"multi_zone_4_temperature": "TBD",
+	"multi_zone_4_initial_layer": "TBD",
+	"pellet_flow_coefficient": [
+		"1"
+	],
+
+	"compatible_printers": [
+		"VORMETRA G1000 5.0 nozzle"
+	]
+}

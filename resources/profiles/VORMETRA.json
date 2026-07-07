@@ -1,0 +1,50 @@
+{
+	"name": "VORMETRA",
+	"version": "01.00.00.00",
+	"force_update": "0",
+	"description": "VORMETRA G1000 - buyuk format granul (FGF/pellet) 3D baski profili",
+	"machine_model_list": [
+		{
+			"name": "VORMETRA G1000",
+			"sub_path": "machine/VORMETRA G1000.json"
+		}
+	],
+	"machine_list": [
+		{
+			"name": "fdm_machine_common",
+			"sub_path": "machine/fdm_machine_common.json"
+		},
+		{
+			"name": "VORMETRA_G1000_common",
+			"sub_path": "machine/VORMETRA_G1000_common.json"
+		},
+		{
+			"name": "VORMETRA G1000 5.0 nozzle",
+			"sub_path": "machine/VORMETRA G1000 5.0 nozzle.json"
+		}
+	],
+	"process_list": [
+		{
+			"name": "fdm_process_common",
+			"sub_path": "process/fdm_process_common.json"
+		},
+		{
+			"name": "2.00mm Standard @VORMETRA G1000",
+			"sub_path": "process/2.00mm Standard.json"
+		}
+	],
+	"filament_list": [
+		{
+			"name": "fdm_filament_common",
+			"sub_path": "filament/fdm_filament_common.json"
+		},
+		{
+			"name": "VORMETRA PETG Pellet",
+			"sub_path": "filament/VORMETRA PETG Pellet.json"
+		},
+		{
+			"name": "VORMETRA PLA Pellet",
+			"sub_path": "filament/VORMETRA PLA Pellet.json"
+		}
+	]
+}

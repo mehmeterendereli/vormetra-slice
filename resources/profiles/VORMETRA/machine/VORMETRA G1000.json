@@ -1,0 +1,9 @@
+{
+	"type": "machine_model",
+	"name": "VORMETRA G1000",
+	"model_id": "VORMETRA_G1000",
+	"nozzle_diameter": "5.0",
+	"machine_tech": "FGF",
+	"family": "VORMETRA",
+	"default_materials": "VORMETRA PETG Pellet;VORMETRA PLA Pellet"
+}

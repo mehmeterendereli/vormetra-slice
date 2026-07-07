@@ -1,0 +1,68 @@
+{
+	"type": "machine",
+	"name": "VORMETRA G1000 5.0 nozzle",
+	"inherits": "VORMETRA_G1000_common",
+	"from": "system",
+	"setting_id": "VORMETRA_G1000_5_0",
+	"instantiation": "true",
+	"printer_settings_id": "VORMETRA G1000 5.0 nozzle",
+	"printer_model": "VORMETRA G1000",
+	"printer_variant": "5.0",
+	"printer_technology": "FFF",
+
+	"gcode_flavor": "klipper",
+	"nozzle_diameter": [
+		"5.0"
+	],
+	"max_layer_height": [
+		"3.75"
+	],
+	"min_layer_height": [
+		"1.5"
+	],
+	"printable_area": [
+		"0x0",
+		"1000x0",
+		"1000x1000",
+		"0x1000"
+	],
+	"printable_height": "1000",
+
+	"default_filament_profile": [
+		"VORMETRA PETG Pellet"
+	],
+	"default_print_profile": "2.00mm Standard @VORMETRA G1000",
+
+	"retraction_length": [
+		"20"
+	],
+	"retraction_speed": [
+		"200"
+	],
+	"deretraction_speed": [
+		"200"
+	],
+	"retraction_minimum_travel": [
+		"10"
+	],
+	"z_hop": [
+		"1.5"
+	],
+	"z_hop_types": [
+		"Normal Lift"
+	],
+
+	"before_layer_change_gcode": ";BEFORE_LAYER_CHANGE\n;[layer_z]\nG92 E0\n",
+	"layer_change_gcode": ";AFTER_LAYER_CHANGE\n;[layer_z]",
+	"machine_start_gcode": "START_PRINT BED_TEMPERATURE=[bed_temperature_initial_layer] EXTRUDER_TEMPERATURE=[nozzle_temperature_initial_layer]",
+	"machine_end_gcode": "END_PRINT",
+
+	"pellet_modded_printer": "1",
+	"use_extruder_rotation_volume": "1",
+	"use_active_pellet_feeding": "1",
+	"multi_zone": "1",
+	"multi_zone_number": "4",
+	"active_feeder_motor_name": [
+		"extruder_screw"
+	]
+}

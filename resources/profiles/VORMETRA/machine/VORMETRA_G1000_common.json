@@ -1,0 +1,126 @@
+{
+	"type": "machine",
+	"name": "VORMETRA_G1000_common",
+	"inherits": "fdm_machine_common",
+	"from": "system",
+	"instantiation": "false",
+	"printer_settings_id": "VORMETRA_G1000_common",
+	"printer_technology": "FFF",
+	"gcode_flavor": "klipper",
+
+	"default_filament_profile": [
+		"VORMETRA PETG Pellet"
+	],
+	"default_print_profile": "2.00mm Standard @VORMETRA G1000",
+
+	"printable_area": [
+		"0x0",
+		"1000x0",
+		"1000x1000",
+		"0x1000"
+	],
+	"printable_height": "1000",
+
+	"machine_max_speed_x": [
+		"333",
+		"200"
+	],
+	"machine_max_speed_y": [
+		"333",
+		"200"
+	],
+	"machine_max_speed_z": [
+		"145",
+		"80"
+	],
+	"machine_max_acceleration_x": [
+		"2000",
+		"1000"
+	],
+	"machine_max_acceleration_y": [
+		"2000",
+		"1000"
+	],
+	"machine_max_acceleration_z": [
+		"500",
+		"200"
+	],
+	"machine_max_acceleration_e": [
+		"1000",
+		"500"
+	],
+	"machine_max_acceleration_extruding": [
+		"2000",
+		"1000"
+	],
+	"machine_max_acceleration_retracting": [
+		"1000",
+		"500"
+	],
+	"machine_max_jerk_x": [
+		"7",
+		"9"
+	],
+	"machine_max_jerk_y": [
+		"7",
+		"9"
+	],
+	"machine_max_jerk_z": [
+		"7",
+		"0.4"
+	],
+	"machine_max_jerk_e": [
+		"30",
+		"2.5"
+	],
+	"machine_max_speed_e": [
+		"120",
+		"25"
+	],
+
+	"extruder_clearance_height_to_lid": "300",
+	"extruder_clearance_height_to_rod": "150",
+	"extruder_clearance_radius": "250",
+
+	"retraction_length": [
+		"20"
+	],
+	"retraction_speed": [
+		"200"
+	],
+	"deretraction_speed": [
+		"200"
+	],
+	"retraction_minimum_travel": [
+		"10"
+	],
+	"retract_before_wipe": [
+		"0%"
+	],
+	"retract_restart_extra": [
+		"35"
+	],
+	"wipe_distance": [
+		"10"
+	],
+	"z_hop": [
+		"1.5"
+	],
+	"z_hop_types": [
+		"Normal Lift"
+	],
+
+	"before_layer_change_gcode": ";BEFORE_LAYER_CHANGE\n;[layer_z]\nG92 E0\n",
+	"layer_change_gcode": ";AFTER_LAYER_CHANGE\n;[layer_z]",
+	"machine_start_gcode": "START_PRINT BED_TEMPERATURE=[bed_temperature_initial_layer] EXTRUDER_TEMPERATURE=[nozzle_temperature_initial_layer]",
+	"machine_end_gcode": "END_PRINT",
+
+	"pellet_modded_printer": "1",
+	"use_extruder_rotation_volume": "1",
+	"use_active_pellet_feeding": "1",
+	"multi_zone": "1",
+	"multi_zone_number": "4",
+	"active_feeder_motor_name": [
+		"extruder_screw"
+	]
+}

@@ -1,0 +1,39 @@
+{
+	"type": "process",
+	"name": "2.00mm Standard",
+	"inherits": "fdm_process_common",
+	"from": "system",
+	"setting_id": "VORMETRA_2_00mm_standard",
+	"instantiation": "true",
+	"print_settings_id": "2.00mm Standard @VORMETRA G1000",
+
+	"layer_height": "2.0",
+	"initial_layer_print_height": "2.0",
+	"line_width": "6.0",
+	"initial_layer_line_width": "6.5",
+
+	"wall_loops": "2",
+	"top_shell_layers": "3",
+	"bottom_shell_layers": "3",
+	"sparse_infill_density": "15%",
+	"sparse_infill_pattern": "crosshatch",
+
+	"default_acceleration": "2000",
+	"outer_wall_acceleration": "2000",
+	"inner_wall_acceleration": "2000",
+	"travel_acceleration": "2000",
+	"initial_layer_acceleration": "1000",
+
+	"outer_wall_speed": "80",
+	"inner_wall_speed": "100",
+	"sparse_infill_speed": "100",
+	"travel_speed": "250",
+	"initial_layer_speed": "40",
+
+	"brim_type": "outer_only",
+	"brim_width": "15",
+
+	"compatible_printers": [
+		"VORMETRA G1000 5.0 nozzle"
+	]
+}
