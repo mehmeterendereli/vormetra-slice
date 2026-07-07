@@ -49,3 +49,8 @@ internal_docs/
 # Python bytecode
 __pycache__/
 *.pyc
+# vera-control (ADR-043)
+vera-control/.vera-datadir/
+vera-control/*.egg-info/
+vera-control/.pytest_cache/
+run_build.bat

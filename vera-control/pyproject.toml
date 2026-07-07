@@ -1,0 +1,14 @@
+[project]
+name = "vera-control"
+version = "0.1.0"
+description = "AI-controllable slicing layer for VORMETRA Slice (Vera)"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.0.0"]
+dev = ["pytest>=8.0.0"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vera — VORMETRA Slice</title>
+<style>
+  :root {
+    --graphite: #1C2024;
+    --graphite-2: #262b30;
+    --amber: #FF7A1A;
+    --text: #E9EAEC;
+    --text-muted: #9AA0A6;
+    --border: #33383e;
+    --ok: #3ecf8e;
+    --err: #ff5c5c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--graphite);
+    color: var(--text);
+    display: flex;
+    height: 100vh;
+  }
+  #sidebar {
+    width: 320px;
+    border-right: 1px solid var(--border);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+  }
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--amber); }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin: 0 0 8px; }
+  .card {
+    background: var(--graphite-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 13px;
+  }
+  .row { display: flex; justify-content: space-between; margin: 4px 0; }
+  .row span:first-child { color: var(--text-muted); }
+  select, input[type=text] {
+    width: 100%;
+    background: var(--graphite);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  button {
+    background: var(--amber);
+    color: #1C2024;
+    border: none;
+    padding: 9px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  #status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  #chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .msg { max-width: 640px; padding: 10px 14px; border-radius: 10px; font-size: 14px; line-height: 1.5; }
+  .msg.vera { background: var(--graphite-2); border: 1px solid var(--border); align-self: flex-start; }
+  .msg.user { background: var(--amber); color: #1C2024; align-self: flex-end; }
+  .msg.system { color: var(--text-muted); font-size: 12px; align-self: center; font-style: italic; }
+  #composer {
+    border-top: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    gap: 10px;
+  }
+  #composer input { flex: 1; }
+  pre {
+    white-space: pre-wrap;
+    font-size: 11px;
+    background: var(--graphite);
+    padding: 8px;
+    border-radius: 6px;
+    max-height: 160px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="brand"><span class="dot"></span> VORMETRA Slice</div>
+
+  <div>
+    <h2>Motor durumu</h2>
+    <div class="card">
+      <div class="row"><span>Slicer binary</span><span id="health-bin">—</span></div>
+      <div class="row"><span>Durum</span><span><span id="status-dot"></span><span id="health-text">kontrol ediliyor</span></span></div>
+    </div>
+  </div>
+
+  <div>
+    <h2>G1000 profili</h2>
+    <div class="card">
+      <div class="row"><span>Baski hacmi</span><span id="prof-volume">—</span></div>
+      <div class="row"><span>Nozul</span><span>&Oslash;5.0mm</span></div>
+    </div>
+  </div>
+
+  <div>
+    <h2>Dilimle</h2>
+    <div class="card" style="display:flex; flex-direction:column; gap:8px;">
+      <input type="text" id="stl-path" placeholder="STL dosya yolu (mutlak)" />
+      <select id="filament-select"></select>
+      <button id="slice-btn">Dilimle</button>
+      <button class="secondary" id="validate-btn">Sadece boyut kontrolu</button>
+    </div>
+  </div>
+
+  <div>
+    <h2>Son sonuc</h2>
+    <pre id="result-box">Henuz calistirilmadi.</pre>
+  </div>
+</div>
+
+<div id="main">
+  <div id="chat"></div>
+  <div id="composer">
+    <input type="text" id="chat-input" placeholder="Vera'ya bir sey sor..." />
+    <button id="send-btn">Gonder</button>
+  </div>
+</div>
+
+<script>
+const API = "";
+
+function addMsg(role, text) {
+  const chat = document.getElementById("chat");
+  const div = document.createElement("div");
+  div.className = "msg " + role;
+  div.textContent = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function refreshHealth() {
+  try {
+    const res = await fetch(API + "/health");
+    const data = await res.json();
+    document.getElementById("health-bin").textContent = data.exists ? "bulundu" : "eksik";
+    const dot = document.getElementById("status-dot");
+    const text = document.getElementById("health-text");
+    if (data.ok) {
+      dot.style.background = "var(--ok)";
+      text.textContent = "hazir";
+    } else {
+      dot.style.background = "var(--err)";
+      text.textContent = "yapilandirilmadi (binary yok)";
+    }
+  } catch (e) {
+    document.getElementById("health-text").textContent = "API'ye ulasilamiyor";
+  }
+}
+
+async function refreshProfiles() {
+  try {
+    const res = await fetch(API + "/profiles");
+    const data = await res.json();
+    const v = data.build_volume_mm;
+    document.getElementById("prof-volume").textContent =
+      v.bed_x_mm + "x" + v.bed_y_mm + "x" + v.bed_z_mm + " mm";
+    const sel = document.getElementById("filament-select");
+    sel.innerHTML = "";
+    data.filaments.forEach((f) => {
+      const opt = document.createElement("option");
+      opt.value = f;
+      opt.textContent = f.toUpperCase();
+      sel.appendChild(opt);
+    });
+  } catch (e) { /* health check already reports the failure */ }
+}
+
+document.getElementById("validate-btn").addEventListener("click", async () => {
+  const stl = document.getElementById("stl-path").value.trim();
+  const box = document.getElementById("result-box");
+  if (!stl) { box.textContent = "Once bir STL yolu gir."; return; }
+  box.textContent = "Kontrol ediliyor...";
+  try {
+    const res = await fetch(API + "/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stl_path: stl }),
+    });
+    box.textContent = JSON.stringify(await res.json(), null, 2);
+  } catch (e) { box.textContent = "Hata: " + e; }
+});
+
+document.getElementById("slice-btn").addEventListener("click", async () => {
+  const stl = document.getElementById("stl-path").value.trim();
+  const filament = document.getElementById("filament-select").value;
+  const box = document.getElementById("result-box");
+  if (!stl) { box.textContent = "Once bir STL yolu gir."; return; }
+  box.textContent = "Dilimleniyor (bu biraz surebilir)...";
+  try {
+    const res = await fetch(API + "/slice", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stl_path: stl, filament: filament }),
+    });
+    box.textContent = JSON.stringify(await res.json(), null, 2);
+  } catch (e) { box.textContent = "Hata: " + e; }
+});
+
+async function sendChat() {
+  const input = document.getElementById("chat-input");
+  const text = input.value.trim();
+  if (!text) return;
+  addMsg("user", text);
+  input.value = "";
+  // No LLM backend wired up yet -- honest placeholder, same pattern as the
+  // website's Vera (vormetra.com) when OPENAI_API_KEY is unset. This will
+  // call a real /vera/chat endpoint once a model/key is provisioned by the
+  // founder (see vormetra-slice/CLAUDE.md).
+  addMsg("vera", "Merhaba, ben Vera. Şu anda sohbet motorum yapılandırılmadı — ama soldaki panelden gerçek bir modeli dilimleyebilirim. STL yolunu gir ve “Dilimle”'ye bas.");
+}
+
+document.getElementById("send-btn").addEventListener("click", sendChat);
+document.getElementById("chat-input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendChat();
+});
+
+addMsg("system", "Vera Console baslatildi.");
+addMsg("vera", "Merhaba, ben Vera — VORMETRA Slice'in kontrol paneli. Soldan bir STL dosyasi verip G1000 icin dilimleyebilirsin.");
+
+refreshHealth();
+refreshProfiles();
+</script>
+
+</body>
+</html>
