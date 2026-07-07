@@ -1,57 +1,21 @@
-# CLAUDE.md
+# AGENTS.md — VORMETRA Slice
 
-OrcaSlicer — open-source C++17 3D slicer. wxWidgets GUI, CMake build system.
+Bu depoda çalışan **tüm AI ajanları** için giriş noktası (Claude dışı araçlar dahil).
 
-## Build Commands
+> **Asıl yönerge `CLAUDE.md`'dir — önce onu tam oku.** Bu dosya yalnızca
+> vazgeçilmez kuralların özetidir.
 
-```bash
-# macOS
-cmake --build build/arm64 --config RelWithDebInfo --target all --
+## Vazgeçilmez kurallar
 
-# Linux
-cmake --build build --config RelWithDebInfo --target all --
+1. **AGPLv3:** fork yasal, ama dağıtımda kaynak açma yükümlülüğü var — ticari
+   lansmandan önce §3 (hukuk) kararı gerekiyor. Detay: `CLAUDE.md`.
+2. **İnce fork:** C++ çekirdeğini (`src/`, `deps/`, `cmake/`) gereksiz yere
+   değiştirme — VORMETRA katmanı `resources/profiles/VORMETRA/` + `vera-control/`.
+3. **Uydurma sayı yok:** G1000 verisi yoksa `TBD`, kaynağını belirt.
+4. **Subagent sınırı:** aynı anda en fazla 3; küçük modellere "kendi
+   alt-ajanını açma" talimatı ver.
 
-# Windows (replace %build_type% with Debug/Release/RelWithDebInfo)
-cmake --build . --config %build_type% --target ALL_BUILD -- -m
-```
+## Kaynak
 
-## Testing
-
-Catch2 framework. Tests in `tests/` directory.
-
-```bash
-cd build && ctest --output-on-failure           # all tests
-ctest --test-dir ./tests/libslic3r              # individual suite
-ctest --test-dir ./tests/fff_print
-```
-
-## Code Style
-
-- C++17, selective C++20. PascalCase classes, snake_case functions/variables
-- `#pragma once` for headers. Smart pointers and RAII preferred
-- Parallelization via TBB — be mindful of shared state
-
-## Key Entry Points
-
-- App startup: `src/OrcaSlicer.cpp`
-- Slicing pipeline: `src/libslic3r/Print.cpp`
-- All print/printer/material settings: `src/libslic3r/PrintConfig.cpp`
-- GUI: `src/slic3r/GUI/`
-- Core algorithms: `src/libslic3r/` (GCode/, Fill/, Support/, Geometry/, Format/, Arachne/)
-- Printer profiles: `resources/profiles/[manufacturer].json`
-
-## Critical Constraints
-
-- **Backward compatibility required** for .3mf project files and printer profiles
-- **Cross-platform** — all changes must work on Windows, macOS, and Linux
-- Profile/format changes need version migration handling
-- Dependencies built separately in `deps/build/`, then linked to main app
-
-## Code review focus areas
-
-- Changes must not cause regressions in existing functionality, defaults, profiles, or project compatibility.
-- Features gated by options must not affect existing behavior when those options are disabled.
-- Changes should follow the existing code style and architecture. Architectural changes should be justified in code comments and the PR description.
-- Add helper functions or utilities only when existing code cannot reasonably be reused. Avoid duplication.
-- Keep code concise and clear. Manually simplify AI generated bloated codes before review.
-- Include targeted tests or documented verification for behavior changes, especially in slicing logic, profiles, formats, and GUI defaults.
+Ana bilgi tabanı: `github.com/mehmeterendereli/vormetra` (private,
+`DECISIONS.md`/`CLAUDE.md`/`DIZIN_HARITASI.md`).
