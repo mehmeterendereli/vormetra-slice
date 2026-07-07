@@ -34,8 +34,15 @@ VORMETRA katmanındaki değişiklikleri kaydeder.
 
 ### Devam eden (In progress)
 - Kaynaktan tam derleme (`build_release_vs2022.bat`, VS2022 BuildTools +
-  CMake 4.x) — ilk deps derlemesi arka planda çalışıyor (Boost/OCCT/CGAL/
-  wxWidgets — uzun sürüyor, saatler alabilir).
+  CMake 4.x): deps derlemesi (Boost/OCCT/CGAL/wxWidgets, ~saatler sürdü)
+  **tamamlandı**; ana uygulama `cmake configure` adımı **OpenSSL bulunamadı**
+  hatasıyla durdu (`FindOpenSSL.cmake`). Kök neden: **NASM (Netwide
+  Assembler) bu makinede kurulu değil** — OpenSSL'in Windows derlemesi
+  assembly optimizasyonları için gerektiriyor (Perl kurulu, o sorun değil).
+  **Sonraki adım:** NASM kur (`choco install nasm` veya
+  nasm.us'tan indir, PATH'e ekle), `deps` klasörünü temizleyip
+  `build_release_vs2022.bat` yeniden çalıştır. `vera-control` bu blokajdan
+  bağımsız çalışıyor (resmi v2.4.2 binary'sine karşı test edildi).
 
 ### Bilinen eksikler / sonraki adımlar
 - `pellet_flow_coefficient` gerçek G1000'de kalibre edilmedi (nötr "1"
