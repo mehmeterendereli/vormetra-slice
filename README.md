@@ -31,14 +31,22 @@ CMake 4.x). Bu depoda `build_release_vs2022.bat` kullanılır.
 
 ## Yönetişim
 
-Bu repo `github.com/mehmeterendereli/vormetra-slice` (private) — ana bilgi
-tabanı ve işletim tüzüğü ayrı, gizli bir repoda:
+Bu repo `github.com/mehmeterendereli/vormetra-slice` (**public**, 2026-07-07'den
+beri — ADR-047) — ana bilgi tabanı ve işletim tüzüğü ayrı, gizli bir repoda:
 `github.com/mehmeterendereli/vormetra` (`DECISIONS.md`, `CLAUDE.md`,
 `software/slicer/`). Bu reponun kendi `CLAUDE.md`/`AGENTS.md`/`CHANGELOG.md`'si
 var — `vormetra-web` reposuyla aynı desen.
 
 ## Lisans
 
-AGPLv3 (yukarı akıştan devralındı — `LICENSE` dosyasına bakın). Orijinal
+**İki ayrı lisans, bilinçli olarak:**
+- **Motor + profiller** (`src/`, `resources/`, geri kalan her şey): **AGPLv3**
+  (yukarı akıştan devralındı — `LICENSE.txt`). Repo public olduğu için kaynak
+  açma yükümlülüğü baştan karşılanmış durumda — belirsizlik yok.
+- **`vera-control/`**: **MIT** (`vera-control/LICENSE`) — ayrı bir program,
+  motoru CLI/subprocess üzerinden çağırıyor, AGPL'in kapsamına girmiyor;
+  topluluk katkısına açık olsun diye bilinçli olarak MIT seçildi.
+
+Karar + gerekçe: ana bilgi tabanı reposunda `DECISIONS.md` ADR-047. Orijinal
 OrcaSlicer README'si (kredi/topluluk bağlantıları dahil) `README.upstream.md`'de
 korunmuştur.

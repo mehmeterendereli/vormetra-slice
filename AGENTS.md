@@ -7,8 +7,9 @@ Bu depoda çalışan **tüm AI ajanları** için giriş noktası (Claude dışı
 
 ## Vazgeçilmez kurallar
 
-1. **AGPLv3:** fork yasal, ama dağıtımda kaynak açma yükümlülüğü var — ticari
-   lansmandan önce §3 (hukuk) kararı gerekiyor. Detay: `CLAUDE.md`.
+1. **AGPLv3 + açık kaynak:** repo public (ADR-047) — motor+profiller AGPLv3,
+   `vera-control/` MIT. Kaynak-açma yükümlülüğü baştan karşılandı, belirsizlik
+   yok. Buraya gizli bilgi koyma. Detay: `CLAUDE.md`.
 2. **İnce fork:** C++ çekirdeğini (`src/`, `deps/`, `cmake/`) gereksiz yere
    değiştirme — VORMETRA katmanı `resources/profiles/VORMETRA/` + `vera-control/`.
 3. **Uydurma sayı yok:** G1000 verisi yoksa `TBD`, kaynağını belirt.

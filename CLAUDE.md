@@ -1,27 +1,30 @@
 # CLAUDE.md — VORMETRA Slice
 
 Bu repo = **VORMETRA Slice**, VORMETRA G1000 için dilimleyici (OrcaSlicer'ın
-AGPLv3 fork'u). Ana bilgi tabanı AYRI, **gizli** repodadır
+AGPLv3 fork'u). **Public** (2026-07-07'den beri, ADR-047 — kurucu kararı: AGPL
+uyumunu netleştirmek için motor+profiller baştan açık kaynak). Ana bilgi
+tabanı AYRI, **gizli** repodadır
 (`github.com/mehmeterendereli/vormetra`: ürün/mühendislik/iş/fon/ADR'ler).
 
-> ⚠️ **Buraya gizli bilgi (fon, finans, strateji, iç kararlar) KOYMA.** Bu repo
-> AGPLv3 gereği bir gün kaynağı isteyen herkese açılabilir (bkz. altta).
+> ⚠️ **Buraya gizli bilgi (fon, finans, strateji, iç kararlar) KOYMA — bu repo
+> herkese açık, geri dönüşü yok.**
 
 ## Rol & Yetki (ana bilgi tabanıyla aynı model)
 
 Mehmet Eren Dereli'nin **sahip-mühendis zihniyetiyle** çalış; proaktif ol.
-**§3 kurucuya aittir:** para, hukuk, geri dönüşü olmayan üretim, dış iletişim
-(ör. bu repoyu public yapmak, gerçek bir "VORMETRA Slice v1.0" sürümünü
-müşteriye dağıtmak). Kod yazma/profil geliştirme/dahili test §2 (Claude'un
-yetkisi) — bkz. ana repo `CLAUDE.md` §2/§3.
+**§3 kurucuya aittir:** para, hukuk, geri dönüşü olmayan üretim, gerçek bir
+"VORMETRA Slice v1.0" sürümünü müşteriye dağıtmak. Kod yazma/profil
+geliştirme/dahili test §2 (Claude'un yetkisi) — bkz. ana repo `CLAUDE.md` §2/§3.
 
-## 🔒 AGPLv3 — kısa, tek seferlik not (ADR-043'te tam kayıt)
+## 🔓 AGPLv3 + açık kaynak kararı (ADR-043/047'de tam kayıt)
 
-Fork yasal ve yaygın (Bambu/Creality/Snapmaker aynısını yapıyor) — **ama**
-ürünü müşteriye **dağıttığımız** anda tüm değişikliklerin kaynağı AGPLv3 ile
-açık olmak zorunda. Bu bir geliştirme-engelleyici değil; **ticari lansmandan
-önce** bağımsız hukuki görüşle netleştirilmesi gereken bir §3 maddesi. Detay:
-ana repo `DECISIONS.md` ADR-014/043, `software/slicer/strategy-research.md`.
+Fork yasal ve yaygın (Bambu/Creality/Snapmaker aynısını yapıyor). Kurucu
+2026-07-07'de **motor + profillerin baştan açık kaynak olmasına** karar
+verdi — bu, AGPL'in dağıtımda kaynak-açma yükümlülüğünü baştan karşılıyor,
+belirsizlik kalmadı. `vera-control/` ayrı bir program (motoru CLI üzerinden
+çağırıyor, AGPL kapsamına girmiyor) — kurucu onu da açık kaynak (MIT) yapmayı
+seçti, zorunluluktan değil, topluluk katkısı için. Detay: ana repo
+`DECISIONS.md` ADR-014/043/047.
 
 ## Mimari ilkesi: "ince fork" (thin fork)
 

@@ -4,6 +4,13 @@ AI-controllable control layer for VORMETRA Slice. Wraps the slicer engine's
 CLI so that Claude Code, other AI agents, and the embedded "Vera" assistant
 can drive it programmatically instead of only through the desktop GUI.
 
+**License:** MIT (see `LICENSE` in this directory) -- separate from the
+engine's AGPLv3 (root `LICENSE.txt`). This is a standalone program that talks
+to the engine over a CLI/subprocess boundary, not a linked derivative of it,
+so it isn't required to be AGPL; VORMETRA chose to open it under MIT anyway
+for community contribution (founder decision, 2026-07-07 -- see the main
+knowledge-base repo's `DECISIONS.md` ADR-047).
+
 Three ways in, same underlying `vera_control.slicer_bridge`:
 
 - **HTTP API** (`vera_control/api.py`, stdlib only, no new dependency) --

@@ -4,6 +4,16 @@ Format: [Keep a Changelog] esinli, tarih = ISO (YYYY-AA-GG). En yeni üstte.
 Yukarı akış (OrcaSlicer) commit geçmişi ayrı tutulur — bu dosya yalnızca
 VORMETRA katmanındaki değişiklikleri kaydeder.
 
+## [0.1.1] — 2026-07-08
+
+### Değiştirildi (Changed) — Açık kaynak yapıldı (ADR-047, ana repo)
+- Bu repo **public** yapıldı. Motor + `resources/profiles/VORMETRA/` AGPLv3
+  altında kalıyor (yukarı akıştan devralınan lisans) — repo public olduğu
+  için dağıtımda kaynak-açma yükümlülüğü baştan karşılanmış durumda.
+- `vera-control/` ayrıca **MIT** ile lisanslandı (`vera-control/LICENSE`) —
+  AGPL bunu zorunlu kılmıyordu, kurucu topluluk katkısı için tercih etti.
+- `README.md`/`CLAUDE.md`/`AGENTS.md` bu kararı yansıtacak şekilde güncellendi.
+
 ## [0.1.0] — 2026-07-07
 
 ### Eklendi (Added)
