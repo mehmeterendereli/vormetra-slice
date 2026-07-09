@@ -4,6 +4,25 @@ Format: [Keep a Changelog] esinli, tarih = ISO (YYYY-AA-GG). En yeni üstte.
 Yukarı akış (OrcaSlicer) commit geçmişi ayrı tutulur — bu dosya yalnızca
 VORMETRA katmanındaki değişiklikleri kaydeder.
 
+## [Unreleased]
+
+### Değiştirildi (Changed)
+
+- Root README, büyük tam-fork yapısını açıklayan kısa bir giriş ve doğrudan
+  VORMETRA profilleri/Vera bağlantılarıyla yeniden düzenlendi.
+- Profil veya Vera katkıları için sparse/shallow clone komutları eklendi.
+- `FORK_NOTES.md` ve `CONTRIBUTING.md` ile upstream sınırı, senkronizasyon
+  modeli, test beklentileri ve public repo kuralları görünür hale getirildi.
+- Issue formları, PR şablonu ve güvenlik politikası VORMETRA kapsamına
+  uyarlandı.
+
+### Kaldırıldı (Removed)
+
+- Yanlışlıkla upstream OrcaSlicer yöneticilerine/sponsor hesabına yönlendiren
+  funding, issue otomasyonları ve bunlara ait betik/ajan komutları kaldırıldı.
+- Bu repoda yapılandırılmamış OrcaSlicer sırlarına veya release süreçlerine
+  bağlı zamanlanmış/otomatik workflow'lar kaldırıldı.
+
 ## [0.1.1] — 2026-07-08
 
 ### Değiştirildi (Changed) — Açık kaynak yapıldı (ADR-047, ana repo)
