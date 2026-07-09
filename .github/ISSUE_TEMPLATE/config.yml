@@ -1,8 +1,11 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Community Support (Discord channel)
-    url: https://discord.gg/P4VE9UY9gJ
-    about: Please ask and answer support "how do I?"questions here.
-  - name: Discussion Forum
+  - name: Genel OrcaSlicer sorunu
+    url: https://github.com/OrcaSlicer/OrcaSlicer/issues
+    about: VORMETRA katmanından bağımsız OrcaSlicer hatalarını upstream'e bildirin.
+  - name: OrcaSlicer tartışmaları
     url: https://github.com/OrcaSlicer/OrcaSlicer/discussions
-    about: Please raise ideas and feature suggestions here.
+    about: Genel kullanım soruları ve tüm yazıcıları ilgilendiren fikirler.
+  - name: Özel güvenlik bildirimi
+    url: https://github.com/mehmeterendereli/vormetra-slice/security/advisories/new
+    about: Güvenlik açığı ayrıntılarını public issue yerine özel olarak gönderin.

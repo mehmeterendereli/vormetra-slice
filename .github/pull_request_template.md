@@ -1,27 +1,21 @@
-# Description
+## Amaç
 
-<!--
-> Please provide a summary of the changes made in this PR. Include details such as:
-  > * What issue does this PR address or fix?
-  > * What new features or enhancements does this PR introduce?
-  > * Are there any breaking changes or dependencies that need to be considered?
--->
+<!-- Hangi problemi çözüyor? Kullanıcıya etkisi nedir? -->
 
-# Screenshots/Recordings/Graphs
+## Kapsam
 
-<!--
-> Please attach relevant screenshots to showcase the UI changes.
-> Please attach images that can help explain the changes.
--->
+<!-- Profil / vera-control / motor / dokümantasyon / upstream senkronizasyonu -->
 
-## Tests
+## Doğrulama
 
-<!--
-> Please describe the tests that you have conducted to verify the changes made in this PR.
--->
+<!-- Çalıştırılan testler, manuel kontroller ve atlanan kontroller. -->
 
-<!--
-> A guide for users on how to download the artifacts from this PR.
--->
+- [ ] İlgili testleri çalıştırdım veya neden çalıştıramadığımı açıkladım.
+- [ ] Gizli bilgi, erişim anahtarı ya da özel veri eklemedim.
+- [ ] G1000 sayısal değerlerinin kaynağını veya `TBD` durumunu belirttim.
+- [ ] C++ çekirdeği değiştiyse deltanın neden gerekli olduğunu açıkladım.
+- [ ] Profil/proje formatı değiştiyse geriye uyumluluğu değerlendirdim.
 
-[How to Download Pull Requests Artifacts for Testing](https://www.orcaslicer.com/wiki/how_to_download_pr_artifacts)
+## Upstream etkisi
+
+<!-- Genel OrcaSlicer düzeltmesiyse upstream issue/PR bağlantısını ekleyin. -->

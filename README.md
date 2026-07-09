@@ -1,52 +1,80 @@
 # VORMETRA Slice
 
-Dilimleyici (slicer) yazılımı, **VORMETRA G1000** — granül beslemeli (FGF/pellet)
-büyük format endüstriyel 3D yazıcı — için. [OrcaSlicer](https://github.com/OrcaSlicer/OrcaSlicer)'ın
-AGPLv3 fork'u (kararı: ana bilgi tabanı reposundaki `DECISIONS.md` ADR-014/043).
+VORMETRA G1000 granül beslemeli (FGF/pellet), büyük format endüstriyel 3D
+yazıcı için dilimleyici. Proje, [OrcaSlicer](https://github.com/OrcaSlicer/OrcaSlicer)
+üzerine kurulmuş ince bir AGPLv3 forkudur.
 
-**Durum:** Aktif geliştirme. G1000 vendor profili (`resources/profiles/VORMETRA/`)
-uçtan uca doğrulandı (gerçek dilimleme testi). Native GUI rebrand'i sürüyor.
+> **VORMETRA kodunu mu arıyorsunuz?** Doğrudan
+> [G1000 profillerine](resources/profiles/VORMETRA/),
+> [Vera kontrol katmanına](vera-control/) veya
+> [fork rehberine](FORK_NOTES.md) gidin. Depodaki diğer dosyaların çoğu
+> derlenebilir OrcaSlicer motorudur.
 
-## Bu depoda ne var
+**Durum:** Aktif geliştirme. G1000 vendor profili gerçek CLI dilimleme
+testinden geçti. Native GUI marka dönüşümü ve gerçek makine kalibrasyonu
+devam ediyor; yayımlanmış bir VORMETRA Slice sürümü henüz yoktur.
 
-- `resources/profiles/VORMETRA/` — G1000 makine profili + PLA/PETG pellet malzeme
-  profilleri. Hangi değerin gerçek G1000 verisinden geldiği, hangisinin referans
-  makineden (Ginger Additive) alınmış kalibre-edilecek başlangıç noktası olduğu
-  o klasörün kendi `README.md`'sinde açıkça ayrılmıştır.
-- `vera-control/` — slicer'ı **programatik olarak** kontrol eden katman: Claude
-  Code / diğer AI ajanları için MCP sunucusu, herhangi bir istemci için HTTP API,
-  ve web tabanlı "Vera Console" arayüzü. Detay: `vera-control/README.md`.
-- Geri kalan her şey (`src/`, `deps/`, `cmake/`, build script'leri...) yukarı akış
-  (upstream) OrcaSlicer kod tabanı — "ince fork" ilkesiyle mümkün olduğunca az
-  değiştirilmiştir (bkz. `CLAUDE.md`).
+## Depo haritası
 
-## Başlarken
+| Alan | Ne içerir? | Bakım modeli |
+| --- | --- | --- |
+| [`resources/profiles/VORMETRA/`](resources/profiles/VORMETRA/) | G1000 makine, pellet malzeme ve proses profilleri | VORMETRA |
+| [`vera-control/`](vera-control/) | HTTP API, MCP sunucusu ve Vera Console | VORMETRA |
+| [`src/`](src/), [`deps/`](deps/), [`deps_src/`](deps_src/) | OrcaSlicer motoru ve derleme bağımlılıkları | Mümkün olduğunca upstream |
+| [`resources/`](resources/) | UI varlıkları, çeviriler ve üretici profilleri | Büyük ölçüde upstream |
+| [`tests/`](tests/) | C++ motor testleri | Büyük ölçüde upstream |
+| [`README.upstream.md`](README.upstream.md) | Orijinal OrcaSlicer README'si | Upstream kopyası |
 
-**Profil geliştirme / kontrol katmanı** (C++ derlemesi gerekmez): resmi
-OrcaSlicer sürümünü indirin, `vera-control/README.md`'deki talimatları izleyin.
+## Bu depo neden büyük?
 
-**Motoru kaynaktan derlemek:** yukarı akışın kendi `README.upstream.md` /
-GitHub wiki talimatları geçerli (VS2022 + "Desktop development with C++" +
-CMake 4.x). Bu depoda `build_release_vs2022.bat` kullanılır.
+Bu yalnızca bir profil deposu değil, çalıştırılabilir masaüstü uygulamasının tam
+kaynak forkudur. C++ motoru, platform bağımlılıkları, testler, çeviriler, UI
+varlıkları ve desteklenen yazıcı profilleri kaynak ağacında bulunmalıdır.
+Derleme çıktıları, loglar ve Python cache dosyaları Git tarafından izlenmez.
 
-## Yönetişim
+Dosyaları görünürde sadeleştirmek için motor klasörlerini silmek derlemeyi
+bozar ve OrcaSlicer güncellemelerini birleştirmeyi zorlaştırır. VORMETRA
+değişiklik sınırları ve upstream politikası için [`FORK_NOTES.md`](FORK_NOTES.md)
+dosyasına bakın.
 
-Bu repo `github.com/mehmeterendereli/vormetra-slice` (**public**, 2026-07-07'den
-beri — ADR-047) — ana bilgi tabanı ve işletim tüzüğü ayrı, gizli bir repoda:
-`github.com/mehmeterendereli/vormetra` (`DECISIONS.md`, `CLAUDE.md`,
-`software/slicer/`). Bu reponun kendi `CLAUDE.md`/`AGENTS.md`/`CHANGELOG.md`'si
-var — `vormetra-web` reposuyla aynı desen.
+## Küçük indirme seçenekleri
+
+Yalnızca VORMETRA profilleri ve Vera üzerinde çalışacaksanız:
+
+```bash
+git clone --depth 1 --filter=blob:none --sparse \
+  https://github.com/mehmeterendereli/vormetra-slice.git
+cd vormetra-slice
+git sparse-checkout set resources/profiles/VORMETRA vera-control
+```
+
+Tam uygulamayı yalnızca derlemek istiyorsanız geçmişi indirmeden sığ klon
+kullanabilirsiniz:
+
+```bash
+git clone --depth 1 \
+  https://github.com/mehmeterendereli/vormetra-slice.git
+```
+
+Upstream senkronizasyonu yapacak geliştiriciler tam geçmişi klonlamalıdır.
+
+## Geliştirme
+
+- Profil geliştirmeden önce
+  [`resources/profiles/VORMETRA/README.md`](resources/profiles/VORMETRA/README.md)
+  dosyasındaki doğrulanmış CLI kısıtlarını okuyun.
+- Vera kontrol katmanı için [`vera-control/README.md`](vera-control/README.md)
+  talimatlarını izleyin.
+- Motoru kaynaktan derlemek için [`README.upstream.md`](README.upstream.md) ve
+  platform build script'lerini kullanın.
+- Katkı sınırları ve test beklentileri için
+  [`CONTRIBUTING.md`](CONTRIBUTING.md) dosyasına bakın.
 
 ## Lisans
 
-**İki ayrı lisans, bilinçli olarak:**
-- **Motor + profiller** (`src/`, `resources/`, geri kalan her şey): **AGPLv3**
-  (yukarı akıştan devralındı — `LICENSE.txt`). Repo public olduğu için kaynak
-  açma yükümlülüğü baştan karşılanmış durumda — belirsizlik yok.
-- **`vera-control/`**: **MIT** (`vera-control/LICENSE`) — ayrı bir program,
-  motoru CLI/subprocess üzerinden çağırıyor, AGPL'in kapsamına girmiyor;
-  topluluk katkısına açık olsun diye bilinçli olarak MIT seçildi.
+- Motor, profiller ve aksi belirtilmeyen repo içeriği:
+  [GNU AGPLv3](LICENSE.txt).
+- `vera-control/`: [MIT](vera-control/LICENSE).
 
-Karar + gerekçe: ana bilgi tabanı reposunda `DECISIONS.md` ADR-047. Orijinal
-OrcaSlicer README'si (kredi/topluluk bağlantıları dahil) `README.upstream.md`'de
-korunmuştur.
+OrcaSlicer kredi ve topluluk bağlantıları
+[`README.upstream.md`](README.upstream.md) içinde korunur.
