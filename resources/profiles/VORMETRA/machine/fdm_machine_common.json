@@ -6,9 +6,7 @@
 	"adaptive_bed_mesh_margin": "0",
 	"auxiliary_fan": "0",
 	"bed_custom_texture": "",
-	"bed_exclude_area": [
-		"0x0"
-	],
+	"bed_exclude_area": [],
 	"bed_mesh_max": "99999,99999",
 	"bed_mesh_min": "-99999,-99999",
 	"bed_mesh_probe_distance": "50,50",
@@ -134,7 +132,7 @@
 	"nozzle_volume": "0",
 	"parking_pos_retraction": "92",
 	"preferred_orientation": "0",
-	"print_host": "http://10.0.1.200/",
+	"print_host": "",
 	"print_host_webui": "",
 	"printable_area": [
 		"0x0",

@@ -57,13 +57,20 @@ auto-skips if `VERA_SLICER_BIN` isn't set to an existing file -- everything
 else (bridge logic, HTTP API, STL bounding-box math) runs with no engine
 required.
 
+## Runtime safety
+
+`vera_control.slicer_bridge` allows only one real slicer process at a time,
+using both an in-process lock and a `slice.lock` file under `VERA_DATA_DIR`. A
+second `/slice` request returns HTTP 409 instead of queueing another heavy
+engine job, and Windows launches use below-normal process priority where the
+platform exposes it. This is intentional: large G1000 jobs can make a desktop
+unresponsive if multiple agents submit work concurrently.
+
 ## The CLI gotchas this layer exists to hide
 
 `slicer_bridge.py`'s docstring and `resources/profiles/VORMETRA/README.md`
-both document four real bugs found and fixed while building this (Marlin
-G92-E0 validation, the CLI's direct-file-load path silently ignoring
-inherited machine fields and shrinking the bed to the model's own bounding
-box, `pellet_flow_coefficient` not auto-converting to `filament_diameter`
-outside the GUI, and undefined custom placeholder variables). If slicing
-starts failing again after an engine upgrade, check there first before
-assuming the profile JSON is wrong.
+document the real bugs found and fixed while building this: profile inheritance
+gaps in direct CLI file loading, pellet diameter conversion, undefined custom
+placeholder variables, copied network endpoints, invalid exclusion geometry,
+and headless thumbnail gaps. If slicing starts failing again after an engine
+upgrade, check there first before assuming the profile JSON is wrong.

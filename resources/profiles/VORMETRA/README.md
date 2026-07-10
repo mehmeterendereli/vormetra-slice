@@ -64,7 +64,7 @@ coefficient=1'den doğru hesaplandı), `bed_shape: 0x0,1000x0,1000x1000,0x1000`,
 (100mm / 2.0mm), 6.00/6.50mm ekstrüzyon genişliği, `SET_PRESSURE_ADVANCE ADVANCE=0.3`,
 `START_PRINT BED_TEMPERATURE=... EXTRUDER_TEMPERATURE=...` makro çağrısı.
 
-**Bu süreçte bulunan ve düzeltilen 4 gerçek CLI/profil hatası (gelecekte aynı
+**Bu süreçte bulunan ve düzeltilen gerçek CLI/profil hataları (gelecekte aynı
 hataya düşmemek için not edildi — `vera-control/` katmanı da bunu hesaba katar):**
 1. **Marlin G92-E0 kontrolü:** `gcode_flavor` "klipper" olmadan (varsayılan Marlin
    kabul ediliyor), OrcaSlicer relative-extruder G-code için `before_layer_change_gcode`
@@ -90,7 +90,18 @@ hataya düşmemek için not edildi — `vera-control/` katmanı da bunu hesaba k
    (`[bed_temperature_initial_layer]`, `[nozzle_temperature_initial_layer]`).
    4-bölge/vida-hacmi parametreli tam makro, Klipper `printer.cfg` tarafı netleşince
    ve/veya özel seçenek kaydı mekanizması bulununca eklenecek (CTL-01 bağımlı).
+5. **Kopyalanmış ağ adresi:** Ginger taban profilindeki `http://10.0.1.200/`
+   VORMETRA'ya ait doğrulanmış bir endpoint değildi. GUI bunu gerçek yerel cihaz
+   sanıp `Unsupported printer type: VORMETRA G1000` hatası üretiyordu. `print_host`
+   artık boştur; makine kontrol endpoint'i firmware/protokol kararıyla birlikte
+   doğrulanana kadar profile adres yazılmayacaktır.
+6. **Geçersiz tabla dışlama alanı:** Tek noktadan oluşan `bed_exclude_area: ["0x0"]`
+   GUI'de `Unable to create exclude triangles` hatasına yol açıyordu. G1000 için
+   doğrulanmış bir dışlama poligonu olmadığından alan boş diziye çevrildi.
+7. **Headless thumbnail:** CLI, OpenGL bağlamı yokken 3MF ilişkilerine thumbnail
+   yollarını yazıyor fakat PNG dosyalarını üretemiyor. `vera-control` eksik
+   `plate_1.png` ve `plate_1_small.png` hedeflerini geçerli nötr PNG'lerle
+   tamamlayarak GUI Preview arşivini tutarlı hale getiriyor.
 
 **Doğrulanmamış kalan:** `hot_plate_temp` (PETG için 0 istendi, çıkan G-code'da 35
 görüldü — alan adı eşleşmesi teyit edilmeli, düşük öncelik, sonraki geçişte bakılacak).
-

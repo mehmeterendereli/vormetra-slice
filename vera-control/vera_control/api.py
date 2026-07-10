@@ -78,6 +78,7 @@ class VeraRequestHandler(BaseHTTPRequestHandler):
                 "ok": config.SLICER_BIN.exists(),
                 "slicer_bin": str(config.SLICER_BIN),
                 "exists": config.SLICER_BIN.exists(),
+                "slice_running": slicer_bridge.is_slice_running(),
                 "service": "vera-control",
                 "version": "0.1.0",
             })
@@ -124,6 +125,9 @@ class VeraRequestHandler(BaseHTTPRequestHandler):
             return
         try:
             result = slicer_bridge.slice_model(stl_path, filament=filament)
+        except slicer_bridge.VeraSlicerBusy as exc:
+            self._send_json({"error": str(exc)}, status=409)
+            return
         except slicer_bridge.VeraSlicerError as exc:
             self._send_json({"error": str(exc)}, status=422)
             return

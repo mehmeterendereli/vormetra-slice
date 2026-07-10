@@ -7,6 +7,7 @@ import urllib.request
 import pytest
 
 from vera_control import api
+from vera_control import slicer_bridge
 from vera_control.api import VeraRequestHandler
 from http.server import ThreadingHTTPServer
 
@@ -42,6 +43,7 @@ def test_health_endpoint(server):
     assert status == 200
     assert body["service"] == "vera-control"
     assert "slicer_bin" in body
+    assert body["slice_running"] is False
 
 
 def test_profiles_endpoint(server):
@@ -69,3 +71,20 @@ def test_slice_unknown_filament_returns_422(server, tmp_path):
     status, body = _post(f"{server}/slice", {"stl_path": "nope.stl", "filament": "unobtainium"})
     assert status in (400, 422)
     assert "error" in body
+
+
+def test_slice_busy_returns_409_without_queueing(server, tmp_path):
+    stl_path = tmp_path / "cube.stl"
+    stl_path.write_bytes(b"x" * 84)
+
+    assert slicer_bridge._acquire_slice_slot()
+    try:
+        status, body = _post(
+            f"{server}/slice",
+            {"stl_path": str(stl_path), "filament": "petg"},
+        )
+    finally:
+        slicer_bridge._release_slice_slot()
+
+    assert status == 409
+    assert "already running" in body["error"]

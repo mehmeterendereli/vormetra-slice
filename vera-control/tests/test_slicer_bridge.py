@@ -1,4 +1,5 @@
 import struct
+import zipfile
 
 import pytest
 
@@ -66,6 +67,27 @@ def test_slice_model_missing_stl_raises():
         slicer_bridge.slice_model("does-not-exist.stl")
 
 
+def test_slice_model_refuses_to_queue_when_already_running(tmp_path):
+    stl_path = tmp_path / "cube.stl"
+    _write_cube_stl(stl_path)
+
+    assert slicer_bridge._acquire_slice_slot()
+    try:
+        with pytest.raises(slicer_bridge.VeraSlicerBusy, match="already running"):
+            slicer_bridge.slice_model(str(stl_path), filament="petg")
+    finally:
+        slicer_bridge._release_slice_slot()
+
+
+def test_stale_slice_lock_from_same_platform_is_removed(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "DATA_DIR", tmp_path)
+    lock_path = tmp_path / "slice.lock"
+    lock_path.write_text(f"pid=-1\nplatform={slicer_bridge.os.name}\n", encoding="ascii")
+
+    assert slicer_bridge.is_slice_running() is False
+    assert not lock_path.exists()
+
+
 def test_parse_header_extracts_known_fields():
     gcode = (
         "; HEADER_BLOCK_START\n"
@@ -88,6 +110,22 @@ def test_parse_header_extracts_known_fields():
     assert stats["bed_shape"] == "0x0,1000x0,1000x1000,0x1000"
 
 
+def test_ensure_archive_thumbnails_adds_valid_pngs_once(tmp_path):
+    archive = tmp_path / "slice.gcode.3mf"
+    with zipfile.ZipFile(archive, "w") as zf:
+        zf.writestr("Metadata/plate_1.gcode", "G28\n")
+
+    slicer_bridge._ensure_archive_thumbnails(archive)
+    slicer_bridge._ensure_archive_thumbnails(archive)
+
+    with zipfile.ZipFile(archive) as zf:
+        names = zf.namelist()
+        assert names.count("Metadata/plate_1.png") == 1
+        assert names.count("Metadata/plate_1_small.png") == 1
+        assert zf.read("Metadata/plate_1.png").startswith(b"\x89PNG\r\n\x1a\n")
+        assert zf.read("Metadata/plate_1_small.png").startswith(b"\x89PNG\r\n\x1a\n")
+
+
 @pytest.mark.skipif(
     not config.SLICER_BIN.exists(),
     reason="no slicer binary at VERA_SLICER_BIN -- set it to run the real integration test",
@@ -108,3 +146,6 @@ def test_slice_model_real_binary_end_to_end():
     assert result.stats["total_layers"] == 50
     assert result.stats["filament_diameter"] == pytest.approx(1.12838, abs=1e-4)
     assert result.stats["bed_shape"] == "0x0,1000x0,1000x1000,0x1000"
+    with zipfile.ZipFile(result.gcode_3mf_path) as zf:
+        assert "Metadata/plate_1.png" in zf.namelist()
+        assert "Metadata/plate_1_small.png" in zf.namelist()
