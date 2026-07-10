@@ -4,6 +4,28 @@ Format: [Keep a Changelog] esinli, tarih = ISO (YYYY-AA-GG). En yeni üstte.
 Yukarı akış (OrcaSlicer) commit geçmişi ayrı tutulur — bu dosya yalnızca
 VORMETRA katmanındaki değişiklikleri kaydeder.
 
+## [0.1.2] — 2026-07-10
+
+### Düzeltildi (Fixed) — bug-hunt turunda doğrulanan 5 gerçek bug (vera-control)
+- **Güvenlik — localhost drive-by CSRF (`api.py`):** kimliksiz yerel API + wildcard
+  `Access-Control-Allow-Origin: *` yüzünden herhangi bir kötücül web sayfası
+  `POST /slice` ile keyfi `stl_path`'i yerel subprocess+disk'e geçirebiliyordu.
+  Wildcard CORS kaldırıldı + `do_POST`'a Origin/Host loopback kontrolü (CSRF +
+  DNS-rebinding). Aynı-origin Vera Console etkilenmez.
+- **`slicer_bridge._pid_is_running`:** Windows'ta `os.kill(pid, 0)` canlılık kontrolü
+  değil (CTRL_C_EVENT==0 → ölü PID'e True); ölü `slice.lock` asla temizlenmiyordu
+  (kalıcı sahte-meşgul 409). `OpenProcess`+`GetExitCodeProcess` dalı eklendi.
+- **`_slice_lock_is_active`:** bozuk/eksik kilit dosyasında koşulsuz `True` → kilit
+  asla temizlenmiyordu. Bozuk kilit temizlenir; yabancı-OS kilidi için mtime-TTL failsafe.
+- **`slice_model`:** `subprocess.run` `TimeoutExpired`'i yakalanmıyordu → "her hata
+  VeraSlicerError döner" sözleşmesi büyük modelde bozuluyordu. `→ VeraSlicerError` (API 422).
+- **`_read_slice_lock`:** `except OSError` `UnicodeDecodeError`'ı kaçırıp ASCII-dışı
+  baytlı kilitte `is_slice_running()`/`GET /health`'i çökertiyordu. `→ except (OSError,
+  UnicodeDecodeError)`.
+- Testler: +8 yeni test (gerçek ölü-PID, bozuk/non-ASCII kilit, timeout→hata, cross-origin/
+  DNS-rebind 403). Tam suite **27 passed, 1 skipped**. Kaynak: ana repo
+  `docs/BUG_HUNT_SATELLITE_20260710.md`. Lisans değişmez (motor AGPLv3, vera-control MIT).
+
 ## [0.1.1] — 2026-07-08
 
 ### Değiştirildi (Changed) — Açık kaynak yapıldı (ADR-047, ana repo)
