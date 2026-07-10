@@ -79,13 +79,80 @@ def test_slice_model_refuses_to_queue_when_already_running(tmp_path):
         slicer_bridge._release_slice_slot()
 
 
+def _dead_pid() -> int:
+    """Gercekten sonlanmis bir surecin PID'i. pid=-1 gibi negatif deger
+    `_pid_is_running`'in `pid <= 0` erken cikisina dusup os.kill/Windows dalini
+    HIC egzersiz etmez; gercek olu PID o dali dogrular."""
+    import subprocess
+    import sys
+
+    proc = subprocess.Popen([sys.executable, "-c", "pass"])
+    proc.wait()
+    return proc.pid
+
+
+def test_pid_is_running_true_for_live_false_for_dead():
+    assert slicer_bridge._pid_is_running(slicer_bridge.os.getpid()) is True
+    assert slicer_bridge._pid_is_running(_dead_pid()) is False
+
+
 def test_stale_slice_lock_from_same_platform_is_removed(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "DATA_DIR", tmp_path)
     lock_path = tmp_path / "slice.lock"
-    lock_path.write_text(f"pid=-1\nplatform={slicer_bridge.os.name}\n", encoding="ascii")
+    # Gercek olu PID: os.kill(pid,0)'in Windows'ta yaniltici oldugu tam kod yolu.
+    lock_path.write_text(
+        f"pid={_dead_pid()}\nplatform={slicer_bridge.os.name}\n", encoding="ascii"
+    )
 
     assert slicer_bridge.is_slice_running() is False
     assert not lock_path.exists()
+
+
+def test_corrupted_or_empty_slice_lock_is_cleared(tmp_path, monkeypatch):
+    # Bos/eksik kilit (or. os.open ile os.write arasi crash) eskiden kosulsuz True
+    # donup kilidi sonsuza dek tutuyordu; artik bozuk sayilip temizlenmeli.
+    monkeypatch.setattr(config, "DATA_DIR", tmp_path)
+    lock_path = tmp_path / "slice.lock"
+    lock_path.write_text("", encoding="ascii")
+
+    assert slicer_bridge._slice_lock_is_active() is False
+    assert not lock_path.exists()
+
+
+def test_read_slice_lock_survives_non_ascii_bytes(tmp_path, monkeypatch):
+    # ASCII-disi baytli kilit dosyasi is_slice_running()/GET /health'i cokertmemeli.
+    monkeypatch.setattr(config, "DATA_DIR", tmp_path)
+    lock_path = tmp_path / "slice.lock"
+    lock_path.write_bytes(b"\xff\xfe garbage pid=1\n")
+
+    assert slicer_bridge._read_slice_lock(lock_path) == {}
+    # bozuk -> aktif degil sayilip temizlenir (cokme yok)
+    assert slicer_bridge._slice_lock_is_active() is False
+
+
+def test_slice_model_timeout_becomes_vera_slicer_error(tmp_path, monkeypatch):
+    # subprocess.run TimeoutExpired'i firlatirsa docstring sozu geregi VeraSlicerError'a
+    # cevrilmeli (api 422 / mcp temiz hata) ve slice slot'i birakilmali.
+    import subprocess
+
+    stl_path = tmp_path / "cube.stl"
+    _write_cube_stl(stl_path)
+
+    fake_bin = tmp_path / "orca-slicer.exe"
+    fake_bin.write_bytes(b"")
+    monkeypatch.setattr(slicer_bridge, "_require_binary", lambda: fake_bin)
+    monkeypatch.setattr(config, "DATA_DIR", tmp_path)
+
+    def _raise_timeout(*a, **k):
+        raise subprocess.TimeoutExpired(cmd="orca-slicer", timeout=300)
+
+    monkeypatch.setattr(slicer_bridge.subprocess, "run", _raise_timeout)
+
+    with pytest.raises(slicer_bridge.VeraSlicerError, match="timed out"):
+        slicer_bridge.slice_model(str(stl_path), filament="petg")
+
+    # finally bloğu slot'u birakmis olmali → sonraki slice engellenmemiş
+    assert slicer_bridge.is_slice_running() is False
 
 
 def test_parse_header_extracts_known_fields():

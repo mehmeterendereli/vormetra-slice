@@ -16,6 +16,7 @@ import re
 import struct
 import subprocess
 import threading
+import time
 import uuid
 import zipfile
 import zlib
@@ -68,7 +69,10 @@ def _slice_lock_path() -> Path:
 def _read_slice_lock(path: Path) -> dict[str, str]:
     try:
         lines = path.read_text(encoding="ascii").splitlines()
-    except OSError:
+    except (OSError, UnicodeDecodeError):
+        # UnicodeDecodeError, OSError'dan turemez (ValueError alt sinifi). ASCII-disi
+        # baytli bozuk bir kilit dosyasi is_slice_running()/GET /health'i cokertmesin;
+        # okunamadi say ({}) -> _slice_lock_is_active bunu bozuk kabul edip temizler.
         return {}
     lock_info = {}
     for line in lines:
@@ -81,6 +85,27 @@ def _read_slice_lock(path: Path) -> dict[str, str]:
 def _pid_is_running(pid: int) -> bool:
     if pid <= 0:
         return False
+    if os.name == "nt":
+        # DIKKAT: Windows'ta os.kill(pid, 0) canlilik kontrolu DEGILDIR — signal
+        # CTRL_C_EVENT == 0 oldugu icin CPython GenerateConsoleCtrlEvent cagirir ve
+        # olu bir PID'e bile True doner → olu slice.lock asla temizlenmez (kalici
+        # sahte-mesgul 409). Gercek kontrol: OpenProcess + GetExitCodeProcess.
+        import ctypes
+        from ctypes import wintypes
+
+        PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+        STILL_ACTIVE = 259
+        kernel32 = ctypes.windll.kernel32
+        handle = kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
+        if not handle:
+            return False  # surec yok (veya erisilemiyor) → mesgul sayma, kilit acilabilsin
+        try:
+            code = wintypes.DWORD()
+            if not kernel32.GetExitCodeProcess(handle, ctypes.byref(code)):
+                return False
+            return code.value == STILL_ACTIVE
+        finally:
+            kernel32.CloseHandle(handle)
     try:
         os.kill(pid, 0)
     except ProcessLookupError:
@@ -92,24 +117,52 @@ def _pid_is_running(pid: int) -> bool:
     return True
 
 
+# Yabanci-OS / dogrulanamayan kilit icin son-care TTL: bu yastan eski her kilit
+# temizlenir. Slice timeout'unun (300s) birkac kati — mesru bir slice bu kadar
+# uzun surmez; boylece yabanci platformdan kalma bir kilit bile bridge'i suresiz
+# kilitleyemez.
+_SLICE_LOCK_MAX_AGE_SECONDS = 1800
+
+
+def _unlink_quietly(path: Path) -> None:
+    try:
+        path.unlink()
+    except FileNotFoundError:
+        pass
+
+
 def _slice_lock_is_active() -> bool:
     lock_path = _slice_lock_path()
     if not lock_path.exists():
         return False
 
     lock_info = _read_slice_lock(lock_path)
-    if lock_info.get("platform") == os.name:
-        try:
-            pid = int(lock_info.get("pid", ""))
-        except ValueError:
-            return True
-        if not _pid_is_running(pid):
-            try:
-                lock_path.unlink()
-            except FileNotFoundError:
-                pass
-            return False
+    if "platform" not in lock_info or "pid" not in lock_info:
+        # Bos/eksik/bozuk kilit (or. _acquire_slice_slot'ta os.open ile os.write
+        # arasinda crash, ya da ASCII-disi baytla bozulma). Guvenilecek bilgi yok —
+        # eski kod bu durumda kosulsuz True donup kilidi SONSUZA DEK tutuyordu. Temizle.
+        _unlink_quietly(lock_path)
+        return False
 
+    if lock_info["platform"] == os.name:
+        try:
+            pid = int(lock_info["pid"])
+        except ValueError:
+            _unlink_quietly(lock_path)
+            return False
+        if not _pid_is_running(pid):
+            _unlink_quietly(lock_path)
+            return False
+        return True
+
+    # Yabanci OS'tan gecerli gorunumlu kilit: PID'i bu platformda dogrulayamayiz.
+    # Suresiz kilitlenmeyi onlemek icin mtime-tabanli TTL failsafe.
+    try:
+        if time.time() - lock_path.stat().st_mtime > _SLICE_LOCK_MAX_AGE_SECONDS:
+            _unlink_quietly(lock_path)
+            return False
+    except OSError:
+        pass
     return True
 
 
@@ -251,7 +304,19 @@ def slice_model(
         # The engine resolves its own bundled resources (fonts, localization, ...)
         # relative to CWD, not to the binary's own path -- so we must run with cwd
         # set to the binary's directory or it fails with an opaque, low-detail error.
-        proc = subprocess.run(cmd, **run_kwargs)
+        try:
+            proc = subprocess.run(cmd, **run_kwargs)
+        except subprocess.TimeoutExpired as exc:
+            # Docstring "her hata VeraSlicerError olarak doner" sozunu koru: 1000mm
+            # bed'de buyuk/karmasik model 300s'i asabilir; yakalanmazsa api._handle_slice
+            # (except VeraSlicerError) ve mcp_server.slice_stl dokumante 422 yerine
+            # yakalanmamis exception verirdi. (300s'in yeterliligi ayri acik soru — TBD.)
+            stdout = exc.stdout.decode() if isinstance(exc.stdout, bytes) else (exc.stdout or "")
+            stderr = exc.stderr.decode() if isinstance(exc.stderr, bytes) else (exc.stderr or "")
+            raise VeraSlicerError(
+                f"slice timed out after {run_kwargs['timeout']}s "
+                f"(model may be too large/complex for the current limit):\n{stdout}\n{stderr}"
+            ) from exc
         if proc.returncode != 0 or not out_3mf.exists():
             raise VeraSlicerError(
                 "slice failed (exit "
