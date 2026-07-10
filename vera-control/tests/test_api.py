@@ -73,6 +73,52 @@ def test_slice_unknown_filament_returns_422(server, tmp_path):
     assert "error" in body
 
 
+def _post_with_headers(url, payload, extra_headers):
+    data = json.dumps(payload).encode("utf-8")
+    headers = {"Content-Type": "application/json", **extra_headers}
+    req = urllib.request.Request(url, data=data, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return resp.status, json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        return e.code, json.loads(e.read())
+
+
+def test_post_from_foreign_origin_is_forbidden(server):
+    # Kotucul cross-origin sayfa: Origin loopback degil -> 403 (drive-by CSRF kapali).
+    status, body = _post_with_headers(
+        f"{server}/slice", {"stl_path": "x.stl"}, {"Origin": "http://evil.example"}
+    )
+    assert status == 403
+    assert "forbidden" in body["error"]
+
+
+def test_post_with_foreign_host_is_forbidden(server):
+    # DNS-rebinding: Host saldirganin alan adi -> 403.
+    status, body = _post_with_headers(
+        f"{server}/validate", {"stl_path": "x.stl"}, {"Host": "attacker.example"}
+    )
+    assert status == 403
+    assert "forbidden" in body["error"]
+
+
+def test_post_from_loopback_origin_is_allowed(server):
+    # Ayni-origin Vera Console: Origin loopback -> normal islenir (403 DEGIL; stl_path
+    # eksik oldugu icin 400 doner, ama origin/host kontrolunu gecmis olur).
+    status, body = _post_with_headers(
+        f"{server}/slice", {}, {"Origin": server}
+    )
+    assert status == 400
+    assert "error" in body
+
+
+def test_options_preflight_has_no_wildcard_cors(server):
+    req = urllib.request.Request(f"{server}/slice", method="OPTIONS")
+    with urllib.request.urlopen(req, timeout=5) as resp:
+        assert resp.status == 204
+        assert resp.headers.get("Access-Control-Allow-Origin") is None
+
+
 def test_slice_busy_returns_409_without_queueing(server, tmp_path):
     stl_path = tmp_path / "cube.stl"
     stl_path.write_bytes(b"x" * 84)
