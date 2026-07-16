@@ -31,13 +31,49 @@ alanın nereden geldiği burada açıkça ayrılıyor.
 - `retraction_length` 20mm / `retraction_speed` 200mm/s / `deretraction_speed` 200mm/s:
   Ginger'ın gerçek suck-back değerleri; ADR-011 (vida ters suck-back) davranışı için
   başlangıç noktası — G1000'de gerçek vida/nozül geometrisiyle kalibre edilmeli.
-- `machine_start_gcode`/`machine_end_gcode` (`START_PRINT`/`END_PRINT` makro çağrısı):
-  Ginger'ın da kullandığı Klipper makro deseni — makro **gövdeleri** firmware
-  (`printer.cfg`) tarafında yazılmalı, bu profilde yok (Ginger'ınki de public repoda
-  yok — bu normal/beklenen bir ayrım). CTL-01 (Klipper vs LinuxCNC) netleşmeden
-  kesinleşmez.
 - PLA `hot_plate_temp: 50`: Ginger'ın gerçek pellet-PLA bed sıcaklığı; G1000 ısıtmalı
   tabla kararı (OQ-07) netleşene kadar geçici.
+
+## CTL-01 (Klipper vs LinuxCNC) KAPANDI — profil LinuxCNC zincirine geçirildi (2026-07-16)
+
+ADR-060 (2026-07-09) kontrol platformunu **LinuxCNC 2.9.4 + PCIe paralel-port I/O**
+olarak kilitledi; harici CAD reposundaki post-processor sözleşmesi
+(`dp-fgf-1000-v2-parametric\V2\slicer\fgf_post.py`, salt-okunur okundu) zinciri açıkça
+**"STL -> PrusaSlicer/OrcaSlicer (Marlin lehçesi, E'li) -> fgf_post.py -> LinuxCNC
+.ngc"** olarak tanımlıyor — Klipper değil. Bu profil o karardan sonra hâlâ Ginger'ın
+Klipper şablonunu taşıyordu (`gcode_flavor: klipper` + `START_PRINT`/`PRINT_START`/
+`END_PRINT`/`PRINT_END` makro çağrıları + `enable_pressure_advance` Klipper'a özgü
+`SET_PRESSURE_ADVANCE` üretiyordu) — bu, gerçek bir zincir kırığıydı: `fgf_post.py`'nin
+G-code kelime ayrıştırıcısı bu makro satırlarını (harf+rakam kalıbına uymadıkları için)
+**sessizce düşürüyordu**, yani ön-ısıtma sıcaklığı .ngc çıktısına hiç taşınmıyordu.
+
+**Düzeltme (bu oturum, uçtan uca gerçek CLI + fgf_post.py çalıştırılarak doğrulandı):**
+- `gcode_flavor`: `klipper` → `marlin` (üç dosyada: `fdm_machine_common.json`,
+  `VORMETRA_G1000_common.json`, `VORMETRA G1000 5.0 nozzle.json`).
+- `machine_start_gcode`/`machine_end_gcode`: makro çağrıları yerine düz M104/M109/
+  G92 E0 (Marlin, `fgf_post.py`'nin M68 E0 Q<sıcaklık> dönüşümünü tetikler).
+- `machine_pause_gcode` (`fdm_machine_common.json`, Klipper `PAUSE` makrosu): boş
+  string — LinuxCNC tarafı için pause sözleşmesi henüz tasarlanmadı, uydurma makro
+  yazılmadı (TBD, kontrol tasarımı bekliyor).
+- `enable_pressure_advance`: `1` → `0` (her iki filament profili) — Klipper'a özgü bir
+  bead-genişliği ön-telafisi; `fgf_post.py`'nin docstring'i gereği koordineli U ekseni
+  (joint 5) bunu zaten gereksiz kılıyor (LinuxCNC trajectory planner U'yu X/Y/Z ile
+  otomatik senkronize eder) — `marlin` lehçesinde etkin bırakılsaydı `M900 K...`
+  üretip yine sessizce düşürülecekti; kapatmak yanıltıcı/etkisiz bir komut üretmeyi
+  engelliyor.
+- **Doğrulama:** 200×200×100mm test küpü resmi CLI ile yeniden dilimlendi (50 katman,
+  önceki 2026-07-07 doğrulamasıyla birebir), çıktıda Klipper makro izi **sıfır**,
+  gerçek `M104 S245`/`M109 S245`/`M104 S0` satırları mevcut; bu G-code doğrudan
+  `fgf_post.py`'den geçirildi — hatasız `.ngc` üretti (`M68 E0 Q245/Q240/Q0` +
+  koordineli `U` hareketleri, zarf/yay/pozisyon fail-closed kontrollerinin hiçbiri
+  tetiklenmedi). Kalıcı regresyon testleri:
+  `vera-control/tests/test_slicer_bridge.py::test_slice_model_emits_marlin_gcode_not_klipper_macros`
+  ve `::test_sliced_gcode_survives_fgf_post_linuxcnc_conversion` (ikincisi
+  `VERA_FGF_POST_PATH`/harici CAD reposu bu makinede yoksa otomatik skip edilir).
+- **Kapsam dışı kalan (ayrı, önceden bilinen TBD'ler):** 4-bölge bağımsız ısıtıcı
+  kanalı (`multi_zone_1..4_*` hâlâ "TBD") — `fgf_post.py` şu an tek analog kanal
+  (`M68 E0`) modelliyor, dört fiziksel bandı ayrı ayrı sürmüyor; bu Elektrik E1/OQ-05
+  kapanışına bağlı, bu düzeltmenin kapsamında değildi.
 
 ## Genel malzeme literatürü (G1000'e özgü değil, ama uydurma da değil)
 - PLA nozül sıcaklığı 180–220°C, PETG 230–250°C: yaygın commodity filament/pellet
@@ -88,8 +124,14 @@ hataya düşmemek için not edildi — `vera-control/` katmanı da bunu hesaba k
    seçenek kaydı olmalı (public repoda yok). `machine_start_gcode` bu yüzden şimdilik
    yalnızca standart, tanınan placeholder'ları kullanacak şekilde **sadeleştirildi**
    (`[bed_temperature_initial_layer]`, `[nozzle_temperature_initial_layer]`).
-   4-bölge/vida-hacmi parametreli tam makro, Klipper `printer.cfg` tarafı netleşince
-   ve/veya özel seçenek kaydı mekanizması bulununca eklenecek (CTL-01 bağımlı).
+   4-bölge/vida-hacmi parametreli tam makro burada da eklenmedi — ama artık nedeni
+   "Klipper `printer.cfg` netleşmedi" değil (CTL-01 KAPANDI, aşağıdaki bölüm): gerçek
+   engel `fgf_post.py`'nin şu an yalnızca TEK analog ısıtıcı kanalı (`M68 E0`)
+   modellemesi, 4 bağımsız bandı henüz ayrı sürmemesi (Elektrik E1/OQ-05'e bağlı TBD).
+
+> **Not (2026-07-16):** Bu bölümdeki `SET_PRESSURE_ADVANCE`/`START_PRINT` örnek
+> çıktısı 2026-07-07 tarihli, henüz `gcode_flavor: klipper` iken alınmış tarihsel bir
+> kayıttır — güncel profil artık bunları üretmez, bkz. yukarıdaki "CTL-01 KAPANDI" bölümü.
 5. **Kopyalanmış ağ adresi:** Ginger taban profilindeki `http://10.0.1.200/`
    VORMETRA'ya ait doğrulanmış bir endpoint değildi. GUI bunu gerçek yerel cihaz
    sanıp `Unsupported printer type: VORMETRA G1000` hatası üretiyordu. `print_host`

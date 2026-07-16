@@ -32,6 +32,15 @@ DEFAULT_MACHINE = VORMETRA_PROFILES_DIR / "machine" / "VORMETRA G1000 5.0 nozzle
 DEFAULT_PROCESS = VORMETRA_PROFILES_DIR / "process" / "2.00mm Standard.json"
 DEFAULT_FILAMENT = VORMETRA_PROFILES_DIR / "filament" / "VORMETRA PETG Pellet.json"
 
+# Read-only dependency on the external CAD/control repo's post-processor (CLAUDE.md
+# WORKING_PROTOCOL: VORMETRA never writes there, but importing/running its published
+# fgf_post.py contract to validate the slicer->LinuxCNC chain is fine). Local-machine
+# path only -- no CI, mirrors SLICER_BIN's own local-prototype default above.
+FGF_POST_PATH = _env_path(
+    "VERA_FGF_POST_PATH",
+    Path(r"C:\Users\pc\Desktop\dp-fgf-1000-v2-parametric\V2\slicer\fgf_post.py"),
+)
+
 FILAMENT_CHOICES = {
     "petg": VORMETRA_PROFILES_DIR / "filament" / "VORMETRA PETG Pellet.json",
     "pla": VORMETRA_PROFILES_DIR / "filament" / "VORMETRA PLA Pellet.json",

@@ -42,7 +42,7 @@
 		"50"
 	],
 	"enable_pressure_advance": [
-		"1"
+		"0"
 	],
 	"pressure_advance": [
 		"0.3"

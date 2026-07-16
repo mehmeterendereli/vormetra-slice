@@ -10,7 +10,7 @@
 	"printer_variant": "5.0",
 	"printer_technology": "FFF",
 
-	"gcode_flavor": "klipper",
+	"gcode_flavor": "marlin",
 	"nozzle_diameter": [
 		"5.0"
 	],
@@ -54,8 +54,8 @@
 
 	"before_layer_change_gcode": ";BEFORE_LAYER_CHANGE\n;[layer_z]\nG92 E0\n",
 	"layer_change_gcode": ";AFTER_LAYER_CHANGE\n;[layer_z]",
-	"machine_start_gcode": "START_PRINT BED_TEMPERATURE=[bed_temperature_initial_layer] EXTRUDER_TEMPERATURE=[nozzle_temperature_initial_layer]",
-	"machine_end_gcode": "END_PRINT",
+	"machine_start_gcode": "M104 S[nozzle_temperature_initial_layer]\nM109 S[nozzle_temperature_initial_layer]\nG92 E0\n",
+	"machine_end_gcode": "M104 S0\n",
 
 	"pellet_modded_printer": "1",
 	"use_extruder_rotation_volume": "1",

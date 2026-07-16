@@ -216,3 +216,79 @@ def test_slice_model_real_binary_end_to_end():
     with zipfile.ZipFile(result.gcode_3mf_path) as zf:
         assert "Metadata/plate_1.png" in zf.namelist()
         assert "Metadata/plate_1_small.png" in zf.namelist()
+
+
+_KLIPPER_MACRO_MARKERS = (
+    "SET_PRESSURE_ADVANCE", "SET_VELOCITY_LIMIT", "PRINT_START", "PRINT_END",
+    "START_PRINT", "END_PRINT",
+)
+
+
+@pytest.mark.skipif(
+    not config.SLICER_BIN.exists(),
+    reason="no slicer binary at VERA_SLICER_BIN -- set it to run the real integration test",
+)
+def test_slice_model_emits_marlin_gcode_not_klipper_macros():
+    """Control platform is LinuxCNC (ADR-060), not Klipper -- the external CAD
+    repo's fgf_post.py post-processor documents its input contract as plain
+    Marlin-flavor G-code (M104/M109, M82/M83, no vendor macros). If gcode_flavor
+    ever drifts back to "klipper" the profile will silently emit macro calls
+    (e.g. PRINT_START/SET_PRESSURE_ADVANCE) that fgf_post.py's G-code word
+    parser can't recognize and drops without warning."""
+    work_dir = config.DATA_DIR / "test-fixtures"
+    work_dir.mkdir(parents=True, exist_ok=True)
+    stl_path = work_dir / "cube.stl"
+    _write_cube_stl(stl_path, 200, 200, 100)
+
+    result = slicer_bridge.slice_model(
+        str(stl_path), filament="petg", output_dir=work_dir / "out_marlin_check"
+    )
+
+    lines = result.gcode_text.splitlines()
+    macro_lines = [l for l in lines if any(marker in l for marker in _KLIPPER_MACRO_MARKERS)]
+    assert macro_lines == [], f"Klipper macro artifacts leaked into G-code: {macro_lines[:5]}"
+
+    heater_lines = [l for l in lines if l.strip().startswith(("M104", "M109"))]
+    assert heater_lines, "expected explicit M104/M109 heater commands in the sliced G-code"
+
+
+@pytest.mark.skipif(
+    not config.SLICER_BIN.exists(),
+    reason="no slicer binary at VERA_SLICER_BIN -- set it to run the real integration test",
+)
+@pytest.mark.skipif(
+    not config.FGF_POST_PATH.exists(),
+    reason="external CAD repo's fgf_post.py not found on this machine (read-only dependency)",
+)
+def test_sliced_gcode_survives_fgf_post_linuxcnc_conversion():
+    """End-to-end chain check for OQ-08 / ACTION_PLAN 'VORMETRA Slice/Orca
+    profilini LinuxCNC U-ekseni post-process zinciriyle dogrula': slice a
+    test cube with the shipped VORMETRA profile, then feed the result
+    through the external CAD repo's fgf_post.py (read-only import; this
+    repo never writes into that directory). Must convert without a
+    fail-closed FGFPostError and must contain coordinated U-axis moves and
+    translated M68 heater setpoints."""
+    import importlib.util
+    import sys
+
+    work_dir = config.DATA_DIR / "test-fixtures"
+    work_dir.mkdir(parents=True, exist_ok=True)
+    stl_path = work_dir / "cube.stl"
+    _write_cube_stl(stl_path, 200, 200, 100)
+
+    result = slicer_bridge.slice_model(
+        str(stl_path), filament="petg", output_dir=work_dir / "out_fgf_post_check"
+    )
+
+    spec = importlib.util.spec_from_file_location("fgf_post", config.FGF_POST_PATH)
+    fgf_post = importlib.util.module_from_spec(spec)
+    # dataclasses' @dataclass decorator resolves string annotations via
+    # sys.modules[cls.__module__] -- must be registered before exec_module runs.
+    sys.modules[spec.name] = fgf_post
+    spec.loader.exec_module(fgf_post)
+
+    ngc, summary = fgf_post.convert(result.gcode_text, filament_diameter_mm=1.12838)
+
+    assert "M68 E0 Q" in ngc, "expected translated heater setpoint (M68 E0 Q<temp>) in .ngc output"
+    assert " U" in ngc, "expected coordinated U-axis (joint 5) moves in .ngc output"
+    assert summary["n_extrude_moves"] > 0

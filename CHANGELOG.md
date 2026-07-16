@@ -4,6 +4,30 @@ Format: [Keep a Changelog] esinli, tarih = ISO (YYYY-AA-GG). En yeni üstte.
 Yukarı akış (OrcaSlicer) commit geçmişi ayrı tutulur — bu dosya yalnızca
 VORMETRA katmanındaki değişiklikleri kaydeder.
 
+## [0.1.3] — 2026-07-16
+
+### Düzeltildi (Fixed) — CTL-01 (Klipper vs LinuxCNC) zincir kırığı kapatıldı
+- Kontrol platformu ADR-060 (2026-07-09) ile LinuxCNC'ye kilitlendiği hâlde profil
+  hâlâ Ginger Additive'in Klipper şablonunu taşıyordu (`gcode_flavor: klipper` +
+  `START_PRINT`/`PRINT_START`/`END_PRINT`/`PRINT_END` makro çağrıları +
+  `enable_pressure_advance` → `SET_PRESSURE_ADVANCE`). Harici CAD reposundaki
+  post-processor (`fgf_post.py`, salt-okunur okundu) girdi sözleşmesini açıkça
+  "Marlin lehçesi" olarak belgeliyor; makro satırları onun G-code kelime
+  ayrıştırıcısına uymadığı için **sessizce düşüyordu** — ön-ısıtma sıcaklığı hiçbir
+  zaman `.ngc` çıktısına taşınmıyordu.
+- `gcode_flavor: klipper → marlin` (3 machine JSON'u); `machine_start_gcode`/
+  `machine_end_gcode` makro yerine düz M104/M109/G92 E0; `machine_pause_gcode`
+  (Klipper `PAUSE`) boşaltıldı (LinuxCNC pause sözleşmesi henüz tasarlanmadı, TBD);
+  `enable_pressure_advance: 1 → 0` (her iki filament — Klipper'a özgü, koordineli U
+  ekseni mimarisinde anlamsız/yanıltıcı).
+- Uçtan uca doğrulandı: resmi CLI ile 200×200×100mm test küpü yeniden dilimlendi
+  (50 katman, 2026-07-07 sonucuyla birebir), sıfır Klipper makro izi, gerçek
+  M104/M109 satırları; çıktı doğrudan `fgf_post.py`'den geçirildi — hatasız `.ngc`
+  (M68 E0 Q245/Q240/Q0 + koordineli U hareketleri). +2 kalıcı regresyon testi
+  (`test_slicer_bridge.py`, biri `VERA_FGF_POST_PATH` yoksa skip). Tam suite
+  **30 passed**. Detay: `resources/profiles/VORMETRA/README.md` "CTL-01 KAPANDI"
+  bölümü, ana repo `DECISIONS.md` ADR-129, `ACTION_PLAN.md`.
+
 ## [0.1.2] — 2026-07-10
 
 ### Düzeltildi (Fixed) — bug-hunt turunda doğrulanan 5 gerçek bug (vera-control)

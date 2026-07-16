@@ -39,12 +39,12 @@
 	"fan_kickstart": "0",
 	"fan_speedup_overhangs": "1",
 	"fan_speedup_time": "0",
-	"gcode_flavor": "klipper",
+	"gcode_flavor": "marlin",
 	"head_wrap_detect_zone": [],
 	"high_current_on_filament_swap": "0",
 	"host_type": "octoprint",
 	"layer_change_gcode": ";AFTER_LAYER_CHANGE\n;[layer_z]",
-	"machine_end_gcode": "PRINT_END",
+	"machine_end_gcode": "M104 S0\n",
 	"machine_load_filament_time": "0",
 	"machine_max_acceleration_e": [
 		"5000",
@@ -114,8 +114,8 @@
 		"0",
 		"0"
 	],
-	"machine_pause_gcode": "PAUSE",
-	"machine_start_gcode": "PRINT_START MATERIAL=[filament_type]\n",
+	"machine_pause_gcode": "",
+	"machine_start_gcode": "M104 S[nozzle_temperature_initial_layer]\nM109 S[nozzle_temperature_initial_layer]\nG92 E0\n",
 	"machine_unload_filament_time": "0",
 	"manual_filament_change": "0",
 	"max_layer_height": [
