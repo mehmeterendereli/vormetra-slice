@@ -88,17 +88,17 @@ VORMETRA katmanındaki değişiklikleri kaydeder.
   reposundaki desenle aynı; C++ çekirdeği için yukarı akışın kendi
   derleme/test/kod-stili notları korunup entegre edildi).
 
-### Devam eden (In progress)
-- Kaynaktan tam derleme (`build_release_vs2022.bat`, VS2022 BuildTools +
-  CMake 4.x): deps derlemesi (Boost/OCCT/CGAL/wxWidgets, ~saatler sürdü)
-  **tamamlandı**; ana uygulama `cmake configure` adımı **OpenSSL bulunamadı**
-  hatasıyla durdu (`FindOpenSSL.cmake`). Kök neden: **NASM (Netwide
-  Assembler) bu makinede kurulu değil** — OpenSSL'in Windows derlemesi
-  assembly optimizasyonları için gerektiriyor (Perl kurulu, o sorun değil).
-  **Sonraki adım:** NASM kur (`choco install nasm` veya
-  nasm.us'tan indir, PATH'e ekle), `deps` klasörünü temizleyip
-  `build_release_vs2022.bat` yeniden çalıştır. `vera-control` bu blokajdan
-  bağımsız çalışıyor (resmi v2.4.2 binary'sine karşı test edildi).
+### Tamamlandı (2026-07-17): kaynaktan TAM DERLEME — native GUI üretildi
+- `build_release_vs2022.bat` uçtan uca BAŞARILI (BITTI exit=0, 16:03):
+  `build/OrcaSlicer/orca-slicer.exe` + tam kurulum ağacı üretildi.
+  Üç katmanlı kök neden zinciri sırayla çözüldü:
+  1. **NASM yok** → resmî nasm.us 2.16.03 taşınabilir zip (C:/Users/pc/Tools/nasm-2.16.03).
+  2. **perl PATH'te yok** → Git'in perl'i eklendi, AMA...
+  3. **perl TÜRÜ yanlış** — OpenSSL native Windows (VC-WIN64A) derlemesi MSYS
+     perl'i reddediyor ("This Perl version ... x86_64-msys"). Çözüm: taşınabilir
+     **Strawberry Perl 5.38.2.2** (C:/Users/pc/Tools/strawberry, MSWin32-x64).
+  Gelecek derlemeler için PATH önü: nasm-2.16.03 + strawberry/perl/bin.
+  Not: GUI'nin ilk elle duman/rebrand kontrolü henüz yapılmadı (ayrı iş).
 
 ### Bilinen eksikler / sonraki adımlar
 - `pellet_flow_coefficient` gerçek G1000'de kalibre edilmedi (nötr "1"
