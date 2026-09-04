@@ -1,52 +1,159 @@
 # VORMETRA Slice
 
-Dilimleyici (slicer) yazılımı, **VORMETRA G1000** — granül beslemeli (FGF/pellet)
-büyük format endüstriyel 3D yazıcı — için. [OrcaSlicer](https://github.com/OrcaSlicer/OrcaSlicer)'ın
-AGPLv3 fork'u (kararı: ana bilgi tabanı reposundaki `DECISIONS.md` ADR-014/043).
+**Open slicing and programmatic-control workspace for the VORMETRA G1000 large-format pellet/FGF manufacturing system.**
 
-**Durum:** Aktif geliştirme. G1000 vendor profili (`resources/profiles/VORMETRA/`)
-uçtan uca doğrulandı (gerçek dilimleme testi). Native GUI rebrand'i sürüyor.
+VORMETRA Slice combines an OrcaSlicer-based C++ engine, a documented **1000 × 1000 × 1000 mm** G1000 machine profile and a Python control bridge that exposes the slicer through HTTP, MCP and direct imports.
 
-## Bu depoda ne var
+**Current status:** active engineering · public source · real CLI/profile validation · physical G1000 commissioning is **not** claimed by this repository
 
-- `resources/profiles/VORMETRA/` — G1000 makine profili + PLA/PETG pellet malzeme
-  profilleri. Hangi değerin gerçek G1000 verisinden geldiği, hangisinin referans
-  makineden (Ginger Additive) alınmış kalibre-edilecek başlangıç noktası olduğu
-  o klasörün kendi `README.md`'sinde açıkça ayrılmıştır.
-- `vera-control/` — slicer'ı **programatik olarak** kontrol eden katman: Claude
-  Code / diğer AI ajanları için MCP sunucusu, herhangi bir istemci için HTTP API,
-  ve web tabanlı "Vera Console" arayüzü. Detay: `vera-control/README.md`.
-- Geri kalan her şey (`src/`, `deps/`, `cmake/`, build script'leri...) yukarı akış
-  (upstream) OrcaSlicer kod tabanı — "ince fork" ilkesiyle mümkün olduğunca az
-  değiştirilmiştir (bkz. `CLAUDE.md`).
+[Open-source portfolio](https://www.mehmeterendereli.com/en/open-source) · [G1000 profile evidence](resources/profiles/VORMETRA/README.md) · [vera-control documentation](vera-control/README.md) · [Upstream OrcaSlicer credits](README.upstream.md)
 
-## Başlarken
+> The purpose of this repository is not to make the machine look finished. It is to make the software chain, assumptions, interfaces and remaining calibration work inspectable.
 
-**Profil geliştirme / kontrol katmanı** (C++ derlemesi gerekmez): resmi
-OrcaSlicer sürümünü indirin, `vera-control/README.md`'deki talimatları izleyin.
+## What has been demonstrated
 
-**Motoru kaynaktan derlemek:** yukarı akışın kendi `README.upstream.md` /
-GitHub wiki talimatları geçerli (VS2022 + "Desktop development with C++" +
-CMake 4.x). Bu depoda `build_release_vs2022.bat` kullanılır.
+| Evidence | Current repository proof |
+|---|---|
+| **Machine profile** | A VORMETRA G1000 vendor profile with a 1000 × 1000 × 1000 mm printable envelope and 5.0 mm nozzle configuration |
+| **Real slicing path** | A 200 × 200 × 100 mm test cube was sliced through the official OrcaSlicer v2.4.2 CLI; the current regression path checks for Marlin G-code rather than silent Klipper macros |
+| **Controller conversion** | Generated G-code was passed through the FGF post-processing path and converted into LinuxCNC `.ngc` output with coordinated U-axis extrusion and fail-closed motion checks |
+| **Programmatic control** | `/health`, `/profiles`, `/validate` and `/slice` HTTP endpoints; native MCP tools; direct Python API; and a lightweight Vera Console |
+| **Runtime protection** | Heavy jobs are guarded by a single-process lock and lock file; competing HTTP work receives a clear `409` response instead of silently overloading the workstation |
+| **Calibration provenance** | Measured/derived G1000 values, reference-machine starting points and unresolved `TBD` values are separated explicitly in the profile documentation |
 
-## Yönetişim
+The permanent regression coverage includes:
 
-Bu repo `github.com/mehmeterendereli/vormetra-slice` (**public**, 2026-07-07'den
-beri — ADR-047) — ana bilgi tabanı ve işletim tüzüğü ayrı, gizli bir repoda:
-`github.com/mehmeterendereli/vormetra` (`DECISIONS.md`, `CLAUDE.md`,
-`software/slicer/`). Bu reponun kendi `CLAUDE.md`/`AGENTS.md`/`CHANGELOG.md`'si
-var — `vormetra-web` reposuyla aynı desen.
+- `test_slice_model_emits_marlin_gcode_not_klipper_macros`
+- `test_sliced_gcode_survives_fgf_post_linuxcnc_conversion`
+- `test_slice_model_real_binary_end_to_end` when a real slicer binary is available
 
-## Lisans
+## System map
 
-**İki ayrı lisans, bilinçli olarak:**
-- **Motor + profiller** (`src/`, `resources/`, geri kalan her şey): **AGPLv3**
-  (yukarı akıştan devralındı — `LICENSE.txt`). Repo public olduğu için kaynak
-  açma yükümlülüğü baştan karşılanmış durumda — belirsizlik yok.
-- **`vera-control/`**: **MIT** (`vera-control/LICENSE`) — ayrı bir program,
-  motoru CLI/subprocess üzerinden çağırıyor, AGPL'in kapsamına girmiyor;
-  topluluk katkısına açık olsun diye bilinçli olarak MIT seçildi.
+```mermaid
+flowchart LR
+    MODEL[3D model] --> ENGINE[OrcaSlicer-based C++ engine]
+    PROFILE[VORMETRA G1000 profile] --> ENGINE
+    ENGINE --> GCODE[Marlin G-code]
+    GCODE --> POST[FGF post-processor]
+    POST --> NGC[LinuxCNC .ngc]
+    NGC --> MACHINE[Machine-control path]
 
-Karar + gerekçe: ana bilgi tabanı reposunda `DECISIONS.md` ADR-047. Orijinal
-OrcaSlicer README'si (kredi/topluluk bağlantıları dahil) `README.upstream.md`'de
-korunmuştur.
+    CLIENT[AI agent or software client] --> INTERFACE{Interface}
+    INTERFACE -->|HTTP| CONTROL[vera-control]
+    INTERFACE -->|MCP| CONTROL
+    INTERFACE -->|Python| CONTROL
+    CONTROL --> ENGINE
+```
+
+The C++ engine and VORMETRA profiles live in this public workspace. The LinuxCNC post-processing stage is integration-tested when its external path is available; the bridge tests automatically skip only the dependency-bound integration cases rather than pretending they ran.
+
+## Repository boundaries
+
+```text
+resources/profiles/VORMETRA/   G1000 machine and pellet-material profiles
+vera-control/                  Python HTTP, MCP and direct-import control layer
+src/, deps/, cmake/            OrcaSlicer-derived C++ engine and build system
+README.upstream.md             Original upstream README and community credits
+CLAUDE.md / AGENTS.md          Repository-specific engineering guidance
+CHANGELOG.md                   Project change history
+```
+
+This is intentionally a thin product fork: VORMETRA-specific profile and control work is kept identifiable instead of being mixed invisibly into the upstream codebase.
+
+## Quick start: inspect the control layer
+
+The Python control layer and most of its tests can be evaluated without compiling the C++ application.
+
+```bash
+git clone https://github.com/mehmeterendereli/vormetra-slice.git
+cd vormetra-slice/vera-control
+python -m pip install -e ".[dev]"
+python -m pytest -q
+```
+
+The real-engine end-to-end test auto-skips when `VERA_SLICER_BIN` does not point to an existing binary. Bridge logic, the HTTP API and STL bounding-box tests still run without the engine.
+
+### Connect a real slicer binary on Windows
+
+```bat
+set VERA_SLICER_BIN=C:\path\to\orca-slicer.exe
+set VERA_PROFILES_DIR=C:\path\to\vormetra-slice\resources\profiles
+```
+
+### Run the HTTP API and Vera Console
+
+```bash
+python run_dev.py
+```
+
+The console and API are then served on port `8765`.
+
+### Run the MCP server
+
+```bash
+python -m pip install -e ".[mcp]"
+python -m vera_control.mcp_server
+```
+
+The MCP server uses stdio transport and exposes:
+
+- `list_filaments`
+- `get_machine_limits`
+- `validate_model`
+- `slice_stl`
+
+All three interfaces use the same underlying `vera_control.slicer_bridge` implementation.
+
+## Profile discipline
+
+Large-format pellet extrusion is not credible when copied desktop-printer values are presented as machine facts. The G1000 profile therefore separates three classes of value:
+
+1. **Measured or design-derived G1000 values** — printable envelope, nozzle, motion-design limits and geometry-derived starting points.
+2. **Reference starting values** — parameters borrowed from a working pellet machine only as first calibration points.
+3. **Unresolved values** — parameters kept as `TBD` until hardware, electrical and process validation closes them.
+
+For example, the documented maximum volumetric-flow figure is a theoretical ceiling, not a promise of sustainable production throughput with the current drive configuration.
+
+Read the full provenance table in [`resources/profiles/VORMETRA/README.md`](resources/profiles/VORMETRA/README.md).
+
+## What this repository does not prove yet
+
+- Completion or commissioning of the physical VORMETRA G1000 machine
+- Production-qualified throughput, dimensional accuracy, surface quality or long-duration reliability
+- A fully calibrated material library across pellet suppliers and ambient conditions
+- Independent closed-loop control of every physical heater band; parts of the multi-zone path remain explicitly `TBD`
+- A turnkey signed desktop release for non-technical operators
+- That optional external LinuxCNC/post-processing integration tests ran on a machine where their required paths were absent
+
+These are deliberate boundaries. A software test, a machine-design value and a production result are three different levels of evidence.
+
+## Building the C++ engine
+
+The upstream Windows toolchain remains applicable: Visual Studio 2022 with **Desktop development with C++**, CMake 4.x and the upstream dependencies. This repository includes `build_release_vs2022.bat` for the VORMETRA workspace.
+
+For complete upstream build instructions and project credits, see [`README.upstream.md`](README.upstream.md) and the OrcaSlicer documentation.
+
+## Licenses and upstream credit
+
+This workspace contains two intentional license scopes:
+
+- **C++ engine and profiles:** AGPLv3, inherited from OrcaSlicer — see [`LICENSE.txt`](LICENSE.txt)
+- **`vera-control`:** MIT — see [`vera-control/LICENSE`](vera-control/LICENSE)
+
+VORMETRA Slice is based on the OrcaSlicer codebase. The original README, contributor history and community references are preserved in [`README.upstream.md`](README.upstream.md).
+
+## Türkçe özet
+
+VORMETRA Slice; VORMETRA G1000 için OrcaSlicer tabanlı dilimleme motorunu, 1000 × 1000 × 1000 mm makine profilini ve slicer'ı HTTP, MCP veya Python üzerinden kontrol eden `vera-control` katmanını aynı açık kaynak çalışma alanında birleştirir.
+
+Bu repo şu anda **yazılım zincirini ve profil doğrulamasını** kanıtlar; fiziksel G1000 makinesinin tamamlanıp devreye alındığını iddia etmez. Gerçek G1000 verileri, referans başlangıç değerleri ve henüz doğrulanmamış `TBD` parametreler profil dokümanında ayrı tutulur.
+
+Kontrol katmanını C++ derlemeden incelemek için:
+
+```bash
+cd vera-control
+python -m pip install -e ".[dev]"
+python -m pytest -q
+```
+
+Detaylı profil ve doğrulama kaydı: [`resources/profiles/VORMETRA/README.md`](resources/profiles/VORMETRA/README.md).
