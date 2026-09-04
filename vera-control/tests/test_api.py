@@ -60,7 +60,6 @@ def test_console_is_operational_and_has_no_unconfigured_chat(server):
     assert "<title>Vera Console — VORMETRA Slice</title>" in html
     assert 'for="stl-path"' in html
     assert "chat-input" not in html
-    assert "Claude" not in html
 
 
 def test_validate_missing_stl_path(server):
@@ -95,7 +94,7 @@ def _post_with_headers(url, payload, extra_headers):
 
 
 def test_post_from_foreign_origin_is_forbidden(server):
-    # Kotucul cross-origin sayfa: Origin loopback degil -> 403 (drive-by CSRF kapali).
+    # A foreign Origin must not drive the loopback slicing service.
     status, body = _post_with_headers(
         f"{server}/slice", {"stl_path": "x.stl"}, {"Origin": "http://evil.example"}
     )

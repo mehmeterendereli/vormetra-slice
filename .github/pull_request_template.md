@@ -1,27 +1,44 @@
-# Description
+## Problem
 
-<!--
-> Please provide a summary of the changes made in this PR. Include details such as:
-  > * What issue does this PR address or fix?
-  > * What new features or enhancements does this PR introduce?
-  > * Are there any breaking changes or dependencies that need to be considered?
--->
+<!-- What verified problem does this change solve? -->
 
-# Screenshots/Recordings/Graphs
+## Root cause
 
-<!--
-> Please attach relevant screenshots to showcase the UI changes.
-> Please attach images that can help explain the changes.
--->
+<!-- What caused the problem? -->
 
-## Tests
+## Implementation
 
-<!--
-> Please describe the tests that you have conducted to verify the changes made in this PR.
--->
+<!-- Summarize the solution and its scope. -->
 
-<!--
-> A guide for users on how to download the artifacts from this PR.
--->
+## Changed files
 
-[How to Download Pull Requests Artifacts for Testing](https://www.orcaslicer.com/wiki/how_to_download_pr_artifacts)
+<!-- List the important files or areas. -->
+
+## Verification
+
+<!-- Record exact commands, environments, results, and explicit skips. -->
+
+## Screenshots
+
+<!-- Add UI evidence when applicable; otherwise state why it is not applicable. -->
+
+## Evidence boundaries
+
+<!-- Separate portable, real-slicer, external-converter, and physical evidence. -->
+
+## Risks
+
+<!-- Include compatibility, security, and licence considerations. -->
+
+## Rollback
+
+<!-- Explain how to return safely to the prior state. -->
+
+## Final expected behaviour
+
+<!-- State the externally observable result. -->
+
+- [ ] I ran the relevant tests or documented each unavailable dependency.
+- [ ] I did not add credentials, private data, customer data, or local absolute paths.
+- [ ] I cited or marked as TBD every new machine-specific numerical value.
+- [ ] I preserved OrcaSlicer attribution and the AGPL/MIT licence boundary.

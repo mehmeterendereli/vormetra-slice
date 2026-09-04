@@ -58,9 +58,11 @@ src/, deps/, cmake/            OrcaSlicer-derived C++ engine and build system
 tests/                         Upstream C++ test tree and local testing notes
 README.upstream.md             Preserved upstream overview and community credits
 CONTRIBUTING.md                Contribution, evidence, and license boundaries
+FORK_NOTES.md                  Upstream synchronization and engine-delta policy
+SECURITY.md                    Private reporting and runtime safety boundary
 ```
 
-This remains a thin product fork: VORMETRA-specific work is kept identifiable instead of being mixed invisibly into upstream code.
+This remains a thin product fork: VORMETRA-specific work is kept identifiable instead of being mixed invisibly into upstream code. See [the fork notes](FORK_NOTES.md) for synchronization guidance and [the security policy](SECURITY.md) for private reporting.
 
 ## Optional real-engine verification
 

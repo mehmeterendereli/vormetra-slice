@@ -2,8 +2,8 @@
 profiles, and a scratch datadir for the engine's own state.
 
 Everything is overridable via environment variables so the same code works
-against the official prebuilt binary (prototyping) and our own fork build
-(``build/OrcaSlicer/orca-slicer.exe`` once VOR-6 finishes) without edits.
+against an official prebuilt binary or a reviewed local source build without
+source edits.
 """
 from __future__ import annotations
 

@@ -22,9 +22,8 @@ from urllib.parse import urlparse
 from . import config, slicer_bridge
 
 CONSOLE_DIR = Path(__file__).parent / "console"
-# Loopback host adlari: hem CSRF/cross-origin (Origin) hem DNS-rebinding (Host)
-# savunmasi bunlara karsi eslesir. Ayni-origin Vera Console bunlari gonderdigi icin
-# etkilenmez; sadece yabanci origin/host reddedilir.
+# Apply the same loopback allowlist to Origin and Host so same-origin console
+# requests work while cross-origin requests and DNS rebinding are rejected.
 _LOOPBACK_HOSTS = frozenset({"127.0.0.1", "localhost", "::1", ""})
 
 
@@ -40,19 +39,17 @@ class VeraRequestHandler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
-        # NOT: Wildcard `Access-Control-Allow-Origin: *` KALDIRILDI. Onceden herhangi
-        # bir kotucul web sayfasi POST /slice ile keyfi stl_path'i yerel subprocess'e
-        # gecirebiliyordu (localhost drive-by CSRF). Ayni-origin Vera Console CORS'a
-        # ihtiyac duymaz; cross-origin erisim artik tarayicida bloklanir.
+        # Intentionally omit a wildcard CORS response. The same-origin console
+        # needs no CORS access, while arbitrary web pages must not start a local
+        # subprocess through POST /slice.
         self.end_headers()
         self.wfile.write(body)
 
     def _request_is_local(self) -> bool:
-        """State degistiren istekler icin CSRF + DNS-rebinding savunmasi.
+        """Protect state-changing requests from CSRF and DNS rebinding.
 
-        - Origin varsa loopback olmali (cross-origin kotucul sayfa http://evil.com
-          gonderir -> reddedilir; ayni-origin konsol http://127.0.0.1:<port> -> gecer).
-        - Host loopback olmali (DNS-rebinding'de Host saldirganin alan adidir)."""
+        An Origin header, when present, must resolve to loopback. Host must also
+        be loopback so a rebinding domain cannot target the local service."""
         host = (self.headers.get("Host") or "").rsplit(":", 1)[0].strip().lower()
         if host not in _LOOPBACK_HOSTS:
             return False

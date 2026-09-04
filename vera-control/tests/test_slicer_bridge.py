@@ -151,7 +151,7 @@ def test_slice_model_timeout_becomes_vera_slicer_error(tmp_path, monkeypatch):
     with pytest.raises(slicer_bridge.VeraSlicerError, match="timed out"):
         slicer_bridge.slice_model(str(stl_path), filament="petg")
 
-    # finally bloğu slot'u birakmis olmali → sonraki slice engellenmemiş
+    # The finally block must release the slot so a later slice is not blocked.
     assert slicer_bridge.is_slice_running() is False
 
 
