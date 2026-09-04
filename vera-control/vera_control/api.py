@@ -25,6 +25,7 @@ CONSOLE_DIR = Path(__file__).parent / "console"
 # Apply the same loopback allowlist to Origin and Host so same-origin console
 # requests work while cross-origin requests and DNS rebinding are rejected.
 _LOOPBACK_HOSTS = frozenset({"127.0.0.1", "localhost", "::1", ""})
+_LOOPBACK_BIND_HOSTS = _LOOPBACK_HOSTS - {""}
 
 
 class VeraRequestHandler(BaseHTTPRequestHandler):
@@ -164,6 +165,9 @@ class VeraRequestHandler(BaseHTTPRequestHandler):
 
 
 def serve(host: str = "127.0.0.1", port: int = 8765) -> None:
+    host = host.strip().lower().removeprefix("[").removesuffix("]")
+    if host not in _LOOPBACK_BIND_HOSTS:
+        raise ValueError("Vera Control API host must be a loopback address")
     httpd = ThreadingHTTPServer((host, port), VeraRequestHandler)
     print(f"Vera Control API listening on http://{host}:{port}")
     try:

@@ -2,7 +2,7 @@
 
 This directory contains the OrcaSlicer vendor profile used by VORMETRA Slice for software evaluation of the G1000 pellet/FGF workflow.
 
-**Status:** active development. The JSON files are schema-checked by the portable suite and have been exercised through a real OrcaSlicer v2.4.2 CLI. Profile values are configuration inputs and calibration starting points; they are not physical performance measurements.
+**Status:** active development. Hosted checks parse every JSON file and verify repository names, references, field types, conflicts, and deterministic setting IDs. The current profiles have also been exercised locally through a real OrcaSlicer v2.4.2 CLI. Profile values are configuration inputs and calibration starting points; they are not physical performance measurements.
 
 ## Files
 
@@ -37,18 +37,11 @@ python -m pip install -e ".[dev]"
 python -m pytest -q
 ```
 
-The portable profile tests check, among other invariants:
+The portable suite checks the selected profile safety fields that do not require a slicer binary: unverified network host values remain empty, the exclusion area is non-degenerate, and the vendor index contains no copied private address. Separate control-layer tests cover the configured 1000 mm software envelope, material selection, lock handling, timeouts, and archive repair.
 
-- the 1000 mm software envelope and 5.0 mm nozzle entries;
-- Marlin flavor and absence of copied Klipper start/end macros;
-- empty unverified network host values;
-- valid exclusion-area configuration;
-- known profile inheritance fields in the leaf machine definition;
-- lock, timeout, and archive behaviour in the control bridge.
+When `VERA_SLICER_BIN` is configured, three additional tests exercise the actual CLI, including the effective machine profile and generated Marlin-flavor G-code. When `VERA_FGF_POST_PATH` is also configured, the generated G-code is passed through the optional LinuxCNC converter and checked for coordinated U-axis extrusion plus translated heater setpoints. Missing optional dependencies are reported as skips, not passes.
 
-When `VERA_SLICER_BIN` is configured, three additional tests exercise the actual CLI. When `VERA_FGF_POST_PATH` is also configured, the generated G-code is passed through the optional LinuxCNC converter and checked for coordinated U-axis extrusion plus translated heater setpoints. Missing optional dependencies are reported as skips.
-
-On 2026-09-04 the current repository profile completed all 32 tests with both software dependencies configured. A control run against the older profiles bundled beside the external binary correctly failed because those profiles still emitted Klipper macros; those stale profiles are not accepted as current evidence.
+On 2026-09-04 the current repository profile completed all 33 tests with both software dependencies configured. A control run against the older profiles bundled beside the external binary correctly failed because those profiles still emitted Klipper macros; those stale profiles are not accepted as current evidence.
 
 ## Known profile constraints
 

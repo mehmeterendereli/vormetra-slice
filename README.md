@@ -12,12 +12,12 @@ VORMETRA Slice makes the software assumptions behind a large-format pellet extru
 
 | Layer | Current evidence | Boundary |
 |---|---|---|
-| Portable Python | 29 tests pass without a slicer binary; 3 dependency-bound tests skip visibly | Does not compile or execute the C++ desktop app |
+| Portable Python | 30 tests pass without a slicer binary; 3 dependency-bound tests skip visibly | Does not compile or execute the C++ desktop app |
 | Real slicer CLI | The current repository profile slices a 200 × 200 × 100 mm fixture through a locally available OrcaSlicer v2.4.2 binary | Uses an external binary; it is not a repository release asset |
 | LinuxCNC conversion | The generated Marlin-flavor G-code passes the explicitly configured converter integration test | Converter is an optional external dependency |
 | Physical machine | No commissioning, throughput, accuracy, surface-quality, or endurance result is asserted | Requires controlled physical testing |
 
-The local verification on 2026-09-04 completed all 32 tests when both optional software dependencies were explicitly configured. Hosted CI intentionally exercises only the portable layer.
+The local verification on 2026-09-04 completed all 33 tests when both optional software dependencies were explicitly configured. Hosted CI intentionally exercises only the portable layer.
 
 ## Quick start
 
@@ -47,7 +47,7 @@ flowchart LR
     PYTHON[Python caller] --> CONTROL
 ```
 
-All programmatic interfaces use the same `vera_control.slicer_bridge` implementation. The HTTP server binds to loopback by default and rejects non-loopback hosts and cross-origin state-changing requests.
+All programmatic interfaces use the same `vera_control.slicer_bridge` implementation. The HTTP server accepts only loopback bind addresses and rejects non-loopback hosts and cross-origin state-changing requests.
 
 ## Repository map
 
@@ -103,7 +103,7 @@ The 1000 × 1000 × 1000 mm envelope and 5.0 mm nozzle are configuration inputs,
 
 ## Known limitations
 
-- No signed installer or executable is distributed by this repository.
+- No signed installer or stable executable is published as a GitHub Release. Full-build CI creates short-lived, unsigned artifacts for engineering verification; they are not an end-user release.
 - The complete C++ desktop build is not part of the portable Python workflow.
 - Material temperatures, retraction, flow, and multi-zone control require physical calibration.
 - The optional converter currently represents one heater-control channel; independent validation of four physical zones remains outside this repository's software proof.

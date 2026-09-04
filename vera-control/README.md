@@ -31,7 +31,7 @@ Runtime paths are environment variables, not source-code defaults.
 | `VERA_PROFILES_DIR` | Profile root containing `VORMETRA/` | Repository `resources/profiles` |
 | `VERA_DATA_DIR` | Locks and generated output | `vera-control/.vera-datadir` |
 | `VERA_FGF_POST_PATH` | Optional reviewed LinuxCNC converter file | Unset |
-| `VERA_HOST` | HTTP bind host | `127.0.0.1` |
+| `VERA_HOST` | HTTP bind host; only `127.0.0.1`, `localhost`, or `::1` is accepted | `127.0.0.1` |
 | `VERA_PORT` | HTTP port | `8765` |
 
 Example from the repository root on Windows:
@@ -65,7 +65,7 @@ $body = @{ stl_path = (Resolve-Path ".\model.stl") } | ConvertTo-Json
 Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8765/validate" -ContentType "application/json" -Body $body
 ```
 
-The server is a local development interface. It checks loopback `Host` and `Origin` values for state-changing requests, but it does not provide authentication or TLS. Do not bind it to an untrusted network.
+The server is a local development interface. It refuses non-loopback bind addresses and checks loopback `Host` and `Origin` values for state-changing requests. It does not provide authentication or TLS.
 
 ## MCP
 
