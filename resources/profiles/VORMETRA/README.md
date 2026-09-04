@@ -41,7 +41,7 @@ The portable suite checks the selected profile safety fields that do not require
 
 When `VERA_SLICER_BIN` is configured, three additional tests exercise the actual CLI, including the effective machine profile and generated Marlin-flavor G-code. When `VERA_FGF_POST_PATH` is also configured, the generated G-code is passed through the optional LinuxCNC converter and checked for coordinated U-axis extrusion plus translated heater setpoints. Missing optional dependencies are reported as skips, not passes.
 
-On 2026-09-04 the current repository profile completed all 33 tests with both software dependencies configured. A control run against the older profiles bundled beside the external binary correctly failed because those profiles still emitted Klipper macros; those stale profiles are not accepted as current evidence.
+On 2026-09-04 the current repository profile completed all 34 tests with both software dependencies configured. A control run against the older profiles bundled beside the external binary correctly failed because those profiles still emitted Klipper macros; those stale profiles are not accepted as current evidence.
 
 ## Known profile constraints
 

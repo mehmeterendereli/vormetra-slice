@@ -121,7 +121,8 @@ def test_post_from_loopback_origin_is_allowed(server):
     assert "error" in body
 
 
-def test_serve_rejects_non_loopback_bind(monkeypatch):
+@pytest.mark.parametrize("host", ["0.0.0.0", "::1"])
+def test_serve_rejects_unsupported_bind(monkeypatch, host):
     class _FakeServer:
         def __init__(self, *_args, **_kwargs):
             pass
@@ -135,7 +136,7 @@ def test_serve_rejects_non_loopback_bind(monkeypatch):
     monkeypatch.setattr(api, "ThreadingHTTPServer", _FakeServer)
 
     with pytest.raises(ValueError, match="loopback"):
-        api.serve(host="0.0.0.0", port=0)
+        api.serve(host=host, port=0)
 
 
 def test_options_preflight_has_no_wildcard_cors(server):

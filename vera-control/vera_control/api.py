@@ -24,7 +24,7 @@ from . import config, slicer_bridge
 CONSOLE_DIR = Path(__file__).parent / "console"
 # Apply the same loopback allowlist to Origin and Host so same-origin console
 # requests work while cross-origin requests and DNS rebinding are rejected.
-_LOOPBACK_HOSTS = frozenset({"127.0.0.1", "localhost", "::1", ""})
+_LOOPBACK_HOSTS = frozenset({"127.0.0.1", "localhost", ""})
 _LOOPBACK_BIND_HOSTS = _LOOPBACK_HOSTS - {""}
 
 

@@ -12,12 +12,12 @@ VORMETRA Slice makes the software assumptions behind a large-format pellet extru
 
 | Layer | Current evidence | Boundary |
 |---|---|---|
-| Portable Python | 30 tests pass without a slicer binary; 3 dependency-bound tests skip visibly | Does not compile or execute the C++ desktop app |
+| Portable Python | 31 tests pass without a slicer binary; 3 dependency-bound tests skip visibly | Does not compile or execute the C++ desktop app |
 | Real slicer CLI | The current repository profile slices a 200 × 200 × 100 mm fixture through a locally available OrcaSlicer v2.4.2 binary | Uses an external binary; it is not a repository release asset |
 | LinuxCNC conversion | The generated Marlin-flavor G-code passes the explicitly configured converter integration test | Converter is an optional external dependency |
 | Physical machine | No commissioning, throughput, accuracy, surface-quality, or endurance result is asserted | Requires controlled physical testing |
 
-The local verification on 2026-09-04 completed all 33 tests when both optional software dependencies were explicitly configured. Hosted CI intentionally exercises only the portable layer.
+The local verification on 2026-09-04 completed all 34 tests when both optional software dependencies were explicitly configured. Hosted CI intentionally exercises only the portable layer.
 
 ## Quick start
 

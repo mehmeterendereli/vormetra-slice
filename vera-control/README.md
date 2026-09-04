@@ -31,7 +31,7 @@ Runtime paths are environment variables, not source-code defaults.
 | `VERA_PROFILES_DIR` | Profile root containing `VORMETRA/` | Repository `resources/profiles` |
 | `VERA_DATA_DIR` | Locks and generated output | `vera-control/.vera-datadir` |
 | `VERA_FGF_POST_PATH` | Optional reviewed LinuxCNC converter file | Unset |
-| `VERA_HOST` | HTTP bind host; only `127.0.0.1`, `localhost`, or `::1` is accepted | `127.0.0.1` |
+| `VERA_HOST` | HTTP bind host; only `127.0.0.1` or `localhost` is accepted | `127.0.0.1` |
 | `VERA_PORT` | HTTP port | `8765` |
 
 Example from the repository root on Windows:
