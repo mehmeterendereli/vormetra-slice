@@ -1,7 +1,5 @@
 # vera-control
 
-[![vera-control verification](https://github.com/mehmeterendereli/vormetra-slice/actions/workflows/vera-control.yml/badge.svg)](https://github.com/mehmeterendereli/vormetra-slice/actions/workflows/vera-control.yml)
-
 AI-controllable control layer for VORMETRA Slice. Wraps the slicer engine's
 CLI so that Claude Code, other AI agents, and the embedded "Vera" assistant
 can drive it programmatically instead of only through the desktop GUI.
@@ -54,21 +52,22 @@ python -m vera_control.mcp_server # MCP server (stdio transport)
 python -m pytest -q
 ```
 
-The same portable suite runs automatically on:
+The portable suite covers the control bridge, HTTP API, profile safety, STL
+parsing, process locking, stale/corrupt lock recovery, timeout handling, G-code
+header parsing and archive repair. It runs without compiling the C++ desktop
+application.
 
-- Ubuntu with Python 3.10 and 3.13
-- Windows with Python 3.10 and 3.13
-
-CI first compiles the package, then runs the control bridge, HTTP API,
-profile-safety and STL tests. The workflow uses sparse checkout, so it verifies
-this layer and the VORMETRA profile tree without downloading or compiling the
-entire OrcaSlicer C++ workspace.
+A four-cell Ubuntu/Windows, Python 3.10/3.13 workflow definition is committed at
+`.github/workflows/vera-control.yml`. GitHub has not emitted a workflow run for
+this repository configuration yet, so no green badge is shown and the matrix is
+not presented as executed evidence. Until repository Actions are enabled, use
+the local command above as the authoritative portable verification path.
 
 The real-engine integration tests auto-skip when `VERA_SLICER_BIN` is not set
 to an existing file. The LinuxCNC conversion test also requires
-`VERA_FGF_POST_PATH`. Those skips are intentional and visible: a green badge
-proves the portable bridge/profile suite, not physical-machine commissioning
-or an external integration that was unavailable on the runner.
+`VERA_FGF_POST_PATH`. Those skips are intentional and visible: neither a local
+portable-suite pass nor a future green matrix proves physical-machine
+commissioning or an external integration that was unavailable on the runner.
 
 ## Runtime safety
 
