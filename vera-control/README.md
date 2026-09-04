@@ -52,10 +52,22 @@ python -m vera_control.mcp_server # MCP server (stdio transport)
 python -m pytest -q
 ```
 
-The real-engine integration test (`test_slice_model_real_binary_end_to_end`)
-auto-skips if `VERA_SLICER_BIN` isn't set to an existing file -- everything
-else (bridge logic, HTTP API, STL bounding-box math) runs with no engine
-required.
+The portable suite covers the control bridge, HTTP API, profile safety, STL
+parsing, process locking, stale/corrupt lock recovery, timeout handling, G-code
+header parsing and archive repair. It runs without compiling the C++ desktop
+application.
+
+A four-cell Ubuntu/Windows, Python 3.10/3.13 workflow definition is committed at
+`.github/workflows/vera-control.yml`. GitHub has not emitted a workflow run for
+this repository configuration yet, so no green badge is shown and the matrix is
+not presented as executed evidence. Until repository Actions are enabled, use
+the local command above as the authoritative portable verification path.
+
+The real-engine integration tests auto-skip when `VERA_SLICER_BIN` is not set
+to an existing file. The LinuxCNC conversion test also requires
+`VERA_FGF_POST_PATH`. Those skips are intentional and visible: neither a local
+portable-suite pass nor a future green matrix proves physical-machine
+commissioning or an external integration that was unavailable on the runner.
 
 ## Runtime safety
 
