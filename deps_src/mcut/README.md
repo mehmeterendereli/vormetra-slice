@@ -109,4 +109,4 @@ These options protect the project's commercial value and thus make it possible f
 
 If MCUT helped you please consider adding a star here on GitHub. This means a lot to the author.
 
-_You can also send an [email](floyd.m.chitalu@gmail.com) to the author if you have questions about MCUT_.
+_You can also send an [email](mailto:floyd.m.chitalu@gmail.com) to the author if you have questions about MCUT_.

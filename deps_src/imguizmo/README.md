@@ -34,7 +34,7 @@ Check the sample for the documentation. More to come...
 ### Graph Editor
 
 Nodes + connections. Custom draw inside nodes is possible with the delegate system in place.
-![Image of GraphEditor](Images/nodeeditor.jpg)
+![Image of GraphEditor](https://raw.githubusercontent.com/CedricGuillemet/ImGuizmo/master/images/nodeeditor.jpg)
 
 ### API doc
 
@@ -185,8 +185,8 @@ ImGuizmo can be installed via [vcpkg](https://github.com/microsoft/vcpkg) and us
 vcpkg install imguizmo
 ```
 
-See the [vcpkg example](/vcpkg-example) for more details
+See the [upstream vcpkg example](https://github.com/CedricGuillemet/ImGuizmo/tree/master/vcpkg-example) for more details.
 
 ## License
 
-ImGuizmo is licensed under the MIT License, see [LICENSE](/LICENSE) for more information.
+ImGuizmo is licensed under the MIT License; see the [upstream LICENSE](https://github.com/CedricGuillemet/ImGuizmo/blob/master/LICENSE) for more information.
