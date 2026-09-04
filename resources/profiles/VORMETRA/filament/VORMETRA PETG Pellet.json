@@ -3,7 +3,7 @@
 	"name": "VORMETRA PETG Pellet",
 	"inherits": "fdm_filament_common",
 	"from": "system",
-	"setting_id": "VORMETRA_PETG_pellet",
+	"setting_id": "BEIZFjNl6M4k7TuS",
 	"instantiation": "true",
 	"filament_settings_id": [
 		"VORMETRA PETG Pellet"
