@@ -2,7 +2,7 @@
 
 Component- and pipeline-level tests for FFF slicing: the path from a `Model` plus config, through `Print` / `PrintObject`, to emitted G-code.
 
-For Catch2 mechanics (assertions, generators, matchers, random ordering, thread-safety), see [../CLAUDE.md](../CLAUDE.md). This document is the organizing contract for the suite: where a test goes, and how it is named.
+For shared C++ test expectations, see [../TESTING.md](../TESTING.md). This document is the organizing contract for the suite: where a test goes, and how it is named.
 
 ## Organizing principle
 

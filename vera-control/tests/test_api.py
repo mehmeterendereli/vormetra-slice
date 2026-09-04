@@ -53,6 +53,15 @@ def test_profiles_endpoint(server):
     assert body["build_volume_mm"]["bed_x_mm"] == 1000.0
 
 
+def test_console_is_operational_and_has_no_unconfigured_chat(server):
+    with urllib.request.urlopen(f"{server}/", timeout=5) as response:
+        html = response.read().decode("utf-8")
+    assert response.status == 200
+    assert "<title>Vera Console — VORMETRA Slice</title>" in html
+    assert 'for="stl-path"' in html
+    assert "chat-input" not in html
+
+
 def test_validate_missing_stl_path(server):
     status, body = _post(f"{server}/validate", {})
     assert status == 400
@@ -85,7 +94,7 @@ def _post_with_headers(url, payload, extra_headers):
 
 
 def test_post_from_foreign_origin_is_forbidden(server):
-    # Kotucul cross-origin sayfa: Origin loopback degil -> 403 (drive-by CSRF kapali).
+    # A foreign Origin must not drive the loopback slicing service.
     status, body = _post_with_headers(
         f"{server}/slice", {"stl_path": "x.stl"}, {"Origin": "http://evil.example"}
     )
@@ -110,6 +119,24 @@ def test_post_from_loopback_origin_is_allowed(server):
     )
     assert status == 400
     assert "error" in body
+
+
+@pytest.mark.parametrize("host", ["0.0.0.0", "::1"])
+def test_serve_rejects_unsupported_bind(monkeypatch, host):
+    class _FakeServer:
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def serve_forever(self):
+            pass
+
+        def server_close(self):
+            pass
+
+    monkeypatch.setattr(api, "ThreadingHTTPServer", _FakeServer)
+
+    with pytest.raises(ValueError, match="loopback"):
+        api.serve(host=host, port=0)
 
 
 def test_options_preflight_has_no_wildcard_cors(server):

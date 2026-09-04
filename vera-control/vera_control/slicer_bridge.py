@@ -1,6 +1,4 @@
-"""Thin wrapper around the OrcaSlicer-derived CLI so any AI agent (or the
-embedded Vera panel) can slice a model without knowing the exact, somewhat
-unforgiving CLI incantation.
+"""Thin wrapper around the OrcaSlicer-derived CLI.
 
 The invocation and the profile-authoring gotchas it works around are
 documented in ``resources/profiles/VORMETRA/README.md`` -- notably: critical
@@ -307,10 +305,9 @@ def slice_model(
         try:
             proc = subprocess.run(cmd, **run_kwargs)
         except subprocess.TimeoutExpired as exc:
-            # Docstring "her hata VeraSlicerError olarak doner" sozunu koru: 1000mm
-            # bed'de buyuk/karmasik model 300s'i asabilir; yakalanmazsa api._handle_slice
-            # (except VeraSlicerError) ve mcp_server.slice_stl dokumante 422 yerine
-            # yakalanmamis exception verirdi. (300s'in yeterliligi ayri acik soru — TBD.)
+            # Keep timeout failures inside the documented VeraSlicerError
+            # contract. Large or complex models may exceed the current limit;
+            # whether 300 seconds is sufficient remains an explicit open limit.
             stdout = exc.stdout.decode() if isinstance(exc.stdout, bytes) else (exc.stdout or "")
             stderr = exc.stderr.decode() if isinstance(exc.stderr, bytes) else (exc.stderr or "")
             raise VeraSlicerError(

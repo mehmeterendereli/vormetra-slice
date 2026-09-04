@@ -1,8 +1,11 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Community Support (Discord channel)
-    url: https://discord.gg/P4VE9UY9gJ
-    about: Please ask and answer support "how do I?"questions here.
-  - name: Discussion Forum
+  - name: Upstream OrcaSlicer issues
+    url: https://github.com/OrcaSlicer/OrcaSlicer/issues
+    about: Report defects that reproduce without the VORMETRA profile or control layer.
+  - name: Upstream OrcaSlicer discussions
     url: https://github.com/OrcaSlicer/OrcaSlicer/discussions
-    about: Please raise ideas and feature suggestions here.
+    about: Ask general OrcaSlicer usage questions and propose engine-wide ideas.
+  - name: Private security report
+    url: https://github.com/mehmeterendereli/vormetra-slice/security/advisories/new
+    about: Send vulnerability details privately instead of opening a public issue.

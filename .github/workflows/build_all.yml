@@ -4,8 +4,6 @@ on:
   push:
     branches:
      - main
-     - release/*
-     - belt-printer
     paths:
      - 'deps/**'
      - 'src/**'
@@ -15,13 +13,14 @@ on:
      - 'resources/**'
      - ".github/workflows/build_*.yml"
      - 'scripts/flatpak/**'
+     - 'scripts/check_packaging_identity.py'
+     - 'scripts/check_fork_workflow_safety.py'
      - 'scripts/msix/**'
      - 'tests/**'
 
   pull_request:
     branches:
      - main
-     - release/*
     paths:
      - 'deps/**'
      - 'deps_src/**'
@@ -34,12 +33,10 @@ on:
      - 'build_release_vs2022.bat'
      - 'build_release_macos.sh'
      - 'scripts/flatpak/**'
+     - 'scripts/check_packaging_identity.py'
+     - 'scripts/check_fork_workflow_safety.py'
      - 'scripts/msix/**'
      - 'tests/**'
-
-
-  schedule:
-      - cron: '0 17 * * *' # run once a day at 1 AM Singapore time (UTC+8)
 
   workflow_dispatch: # allows for manual dispatch
     inputs:
@@ -54,7 +51,31 @@ concurrency:
   
 
 jobs:
+  packaging_identity:
+    name: Validate fork build safety
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out packaging configuration
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            version.inc
+            resources/images
+            scripts/flatpak
+            scripts/check_packaging_identity.py
+            scripts/check_fork_workflow_safety.py
+            .github/workflows/build_all.yml
+            .github/workflows/build_orca.yml
+            .github/workflows/build_check_cache.yml
+            .github/workflows/build_deps.yml
+      - name: Verify configured Linux package assets
+        run: python3 scripts/check_packaging_identity.py
+      - name: Reject upstream publishing capability
+        run: python3 scripts/check_fork_workflow_safety.py
+
   build_linux:
+    needs: packaging_identity
     strategy:
       fail-fast: false
       # Build both arches on every event (PRs included), through the same
@@ -68,16 +89,15 @@ jobs:
             os: ${{ vars.SELF_HOSTED && 'orca-lnx-server' || 'ubuntu-24.04' }}
           - arch: "aarch64"
             os: ubuntu-24.04-arm
-    # Don't run scheduled builds on forks:
-    if: ${{ !cancelled() && (github.event_name != 'schedule' || github.repository == 'OrcaSlicer/OrcaSlicer') }}
+    if: ${{ !cancelled() }}
     uses: ./.github/workflows/build_check_cache.yml
     with:
       os: ${{ matrix.os }}
       arch: ${{ matrix.arch }}
       build-deps-only: ${{ inputs.build-deps-only || false }}
-    secrets: inherit
   build_windows:
     name: Build Windows ${{ matrix.arch }}
+    needs: packaging_identity
     strategy:
       fail-fast: false
       matrix:
@@ -86,42 +106,36 @@ jobs:
             os: windows-latest
           - arch: arm64
             os: windows-11-arm
-    # Don't run scheduled builds on forks:
-    if: ${{ !cancelled() && (github.event_name != 'schedule' || github.repository == 'OrcaSlicer/OrcaSlicer') }}
+    if: ${{ !cancelled() }}
     uses: ./.github/workflows/build_check_cache.yml
     with:
       # Self-hosted runner is x64-only; ARM64 always uses the GitHub-hosted runner.
       os: ${{ (matrix.arch == 'x64' && vars.SELF_HOSTED) && 'orca-win-server' || matrix.os }}
       arch: ${{ matrix.arch }}
       build-deps-only: ${{ inputs.build-deps-only || false }}
-      force-build: ${{ github.event_name == 'schedule' }}
-    secrets: inherit
   build_macos_arch:
+    needs: packaging_identity
     strategy:
       fail-fast: false
       matrix:
         arch:
           - arm64
           - x86_64
-    # Don't run scheduled builds on forks:
-    if: ${{ !cancelled() && (github.event_name != 'schedule' || github.repository == 'OrcaSlicer/OrcaSlicer') }}
+    if: ${{ !cancelled() }}
     uses: ./.github/workflows/build_check_cache.yml
     with:
       os: ${{ vars.SELF_HOSTED && 'orca-macos-arm64' || 'macos-14' }}
       arch: ${{ matrix.arch }}
       build-deps-only: ${{ inputs.build-deps-only || false }}
-      force-build: ${{ github.event_name == 'schedule' }}
-    secrets: inherit
   build_macos_universal:
     name: Build macOS Universal
     needs: build_macos_arch
-    if: ${{ !cancelled() && needs.build_macos_arch.result == 'success' && !inputs.build-deps-only && (github.event_name != 'schedule' || github.repository == 'OrcaSlicer/OrcaSlicer') }}
+    if: ${{ !cancelled() && needs.build_macos_arch.result == 'success' && !inputs.build-deps-only }}
     uses: ./.github/workflows/build_orca.yml
     with:
       os: ${{ vars.SELF_HOSTED && 'orca-macos-arm64' || 'macos-14' }}
       arch: universal
       macos-combine-only: true
-    secrets: inherit
   unit_tests:
     name: Unit Tests
     # Tests are built on the aarch64 leg by default (faster GitHub arm runner),
@@ -160,17 +174,16 @@ jobs:
         with:
           name: unit-test-logs
           path: build/tests/**/*.log
-      - name: Publish Test Results
+      - name: Upload Test Results
         if: always()
-        uses: EnricoMi/publish-unit-test-result-action@v2
+        uses: actions/upload-artifact@v7
         with:
-          files: "ctest_results.xml"
-      - name: Delete Test Artifact
-        if: success()
-        uses: geekyeggo/delete-artifact@v6
-        with:
-          name: ${{ github.sha }}-tests
+          name: unit-test-results-${{ github.run_attempt }}
+          path: ctest_results.xml
+          if-no-files-found: error
+          retention-days: 14
   flatpak:
+    needs: packaging_identity
     name: "Flatpak"
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-50
@@ -189,17 +202,13 @@ jobs:
             runner: ubuntu-24.04
           - arch: aarch64
             runner: ubuntu-24.04-arm
-    # Don't run scheduled builds on forks; skip entirely on self-hosted runners
-    if: ${{ !cancelled() && !vars.SELF_HOSTED && (github.event_name != 'schedule' || github.repository == 'OrcaSlicer/OrcaSlicer') }}
+    if: ${{ !cancelled() && !vars.SELF_HOSTED }}
 
     runs-on: ${{ matrix.variant.runner }}
     env:
       date:
       ver:
       ver_pure:
-      # Belt-printer nightlies share the main nightly release but carry a `_belt`
-      # suffix so they never overwrite the main assets.
-      nightly_suffix: ${{ github.ref == 'refs/heads/belt-printer' && '_belt' || '' }}
     steps:
     - name: "Remove unneeded stuff to free disk space"
       run:
@@ -257,13 +266,3 @@ jobs:
       with:
         name: OrcaSlicer-Linux-flatpak_${{ env.ver }}_${{ matrix.variant.arch }}.flatpak
         path: '/__w/OrcaSlicer/OrcaSlicer/OrcaSlicer-Linux-flatpak_${{ env.ver }}_${{ matrix.variant.arch }}.flatpak'
-    - name: Deploy Flatpak to nightly release
-      if: github.repository == 'OrcaSlicer/OrcaSlicer' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/belt-printer')
-      uses: WebFreak001/deploy-nightly@v3.2.0
-      with:
-        upload_url: https://uploads.github.com/repos/OrcaSlicer/OrcaSlicer/releases/137995723/assets{?name,label}
-        release_id: 137995723
-        asset_path: /__w/OrcaSlicer/OrcaSlicer/OrcaSlicer-Linux-flatpak_${{ env.ver }}_${{ matrix.variant.arch }}.flatpak
-        asset_name: OrcaSlicer-Linux-flatpak_nightly${{ env.nightly_suffix }}_${{ matrix.variant.arch }}.flatpak
-        asset_content_type: application/octet-stream
-        max_releases: 1 # optional, if there are more releases than this matching the asset_name, the oldest ones are going to be deleted

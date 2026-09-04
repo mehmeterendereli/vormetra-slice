@@ -74,5 +74,8 @@ jobs:
       - name: Compile Python package
         run: python -m compileall -q vera_control
 
+      - name: Verify MCP entry point imports
+        run: python -c "from vera_control.mcp_server import mcp; assert mcp.name == 'vormetra-slice'"
+
       - name: Run control, API, profile-safety and STL tests
         run: python -m pytest -q --disable-warnings --maxfail=1

@@ -3,262 +3,225 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Vera — VORMETRA Slice</title>
+<title>Vera Console — VORMETRA Slice</title>
 <style>
   :root {
-    --graphite: #1C2024;
+    color-scheme: dark;
+    --graphite: #1c2024;
     --graphite-2: #262b30;
-    --amber: #FF7A1A;
-    --text: #E9EAEC;
-    --text-muted: #9AA0A6;
-    --border: #33383e;
-    --ok: #3ecf8e;
-    --err: #ff5c5c;
+    --oxide: #e66b17;
+    --text: #e9eaec;
+    --muted: #aeb3b8;
+    --border: #3d4349;
+    --ok: #51c995;
+    --error: #ff7676;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
     background: var(--graphite);
     color: var(--text);
-    display: flex;
-    height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
-  #sidebar {
-    width: 320px;
-    border-right: 1px solid var(--border);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    overflow-y: auto;
+  header { border-bottom: 1px solid var(--border); padding: 18px clamp(20px, 4vw, 56px); }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+  .brand-mark { width: 10px; height: 10px; background: var(--oxide); border-radius: 50%; }
+  main {
+    display: grid;
+    grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+    gap: clamp(24px, 4vw, 64px);
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(32px, 6vw, 72px) clamp(20px, 4vw, 56px);
   }
-  #main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-  }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 600;
-    font-size: 15px;
-  }
-  .brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--amber); }
-  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin: 0 0 8px; }
-  .card {
-    background: var(--graphite-2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 13px;
-  }
-  .row { display: flex; justify-content: space-between; margin: 4px 0; }
-  .row span:first-child { color: var(--text-muted); }
-  select, input[type=text] {
+  h1 { margin: 0 0 12px; font-size: clamp(2rem, 5vw, 4rem); line-height: 1; }
+  h2 { margin: 0 0 14px; font-size: 1.1rem; }
+  p { color: var(--muted); line-height: 1.65; }
+  .eyebrow { color: var(--oxide); font-size: .78rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+  .panel { background: var(--graphite-2); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .stack { display: grid; gap: 20px; }
+  .status-grid { display: grid; gap: 10px; }
+  .status-row { display: flex; justify-content: space-between; gap: 20px; }
+  .status-row span:first-child { color: var(--muted); }
+  .status-value { text-align: right; overflow-wrap: anywhere; }
+  .dot { display: inline-block; width: 8px; height: 8px; margin-right: 7px; border-radius: 50%; }
+  label { display: block; margin: 0 0 7px; color: var(--muted); font-size: .85rem; font-weight: 600; }
+  input, select {
     width: 100%;
-    background: var(--graphite);
+    padding: 10px 12px;
     border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--graphite);
     color: var(--text);
-    padding: 8px;
-    border-radius: 6px;
-    font-size: 13px;
+    font: inherit;
   }
+  input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px solid #f59a58; outline-offset: 2px; }
+  .field { margin-bottom: 14px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; }
   button {
-    background: var(--amber);
-    color: #1C2024;
-    border: none;
-    padding: 9px 14px;
+    min-height: 42px;
+    padding: 9px 15px;
+    border: 1px solid var(--oxide);
     border-radius: 6px;
-    font-weight: 600;
-    font-size: 13px;
+    background: var(--oxide);
+    color: #17191b;
+    font: inherit;
+    font-weight: 700;
     cursor: pointer;
   }
-  button:disabled { opacity: 0.5; cursor: not-allowed; }
-  button.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
-  #status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
-  #chat {
-    flex: 1;
-    overflow-y: auto;
-    padding: 24px 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-  .msg { max-width: 640px; padding: 10px 14px; border-radius: 10px; font-size: 14px; line-height: 1.5; }
-  .msg.vera { background: var(--graphite-2); border: 1px solid var(--border); align-self: flex-start; }
-  .msg.user { background: var(--amber); color: #1C2024; align-self: flex-end; }
-  .msg.system { color: var(--text-muted); font-size: 12px; align-self: center; font-style: italic; }
-  #composer {
-    border-top: 1px solid var(--border);
-    padding: 16px 32px;
-    display: flex;
-    gap: 10px;
-  }
-  #composer input { flex: 1; }
+  button.secondary { background: transparent; color: var(--text); }
   pre {
-    white-space: pre-wrap;
-    font-size: 11px;
-    background: var(--graphite);
-    padding: 8px;
-    border-radius: 6px;
-    max-height: 160px;
-    overflow-y: auto;
+    min-height: 120px;
+    max-height: 320px;
+    margin: 0;
+    padding: 14px;
+    overflow: auto;
     border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--graphite);
+    color: var(--text);
+    font-size: .82rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+  .boundary { margin: 0; padding-left: 20px; color: var(--muted); line-height: 1.7; }
+  code { color: var(--text); }
+  @media (max-width: 760px) {
+    main { grid-template-columns: 1fr; }
+    .actions > button { flex: 1 1 180px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
   }
 </style>
 </head>
 <body>
+<header>
+  <div class="brand"><span class="brand-mark" aria-hidden="true"></span>VORMETRA Slice</div>
+</header>
+<main>
+  <section>
+    <p class="eyebrow">Yerel kontrol arayüzü</p>
+    <h1>Vera Console</h1>
+    <p>G1000 profilini inceleyin, STL boyutunu yazılım zarfına göre doğrulayın veya yapılandırılmış OrcaSlicer motoruyla dilimleme başlatın.</p>
 
-<div id="sidebar">
-  <div class="brand"><span class="dot"></span> VORMETRA Slice</div>
+    <div class="panel stack">
+      <section aria-labelledby="runtime-heading">
+        <h2 id="runtime-heading">Çalışma durumu</h2>
+        <div class="status-grid">
+          <div class="status-row"><span>Kontrol API’si</span><span class="status-value"><span class="dot" id="status-dot"></span><span id="health-text">Kontrol ediliyor</span></span></div>
+          <div class="status-row"><span>Slicer binary</span><span class="status-value" id="health-bin">Kontrol ediliyor</span></div>
+          <div class="status-row"><span>Yazılım zarfı</span><span class="status-value" id="prof-volume">Kontrol ediliyor</span></div>
+          <div class="status-row"><span>Nozul profili</span><span class="status-value">5.0 mm</span></div>
+        </div>
+      </section>
 
-  <div>
-    <h2>Motor durumu</h2>
-    <div class="card">
-      <div class="row"><span>Slicer binary</span><span id="health-bin">—</span></div>
-      <div class="row"><span>Durum</span><span><span id="status-dot"></span><span id="health-text">kontrol ediliyor</span></span></div>
+      <section aria-labelledby="boundary-heading">
+        <h2 id="boundary-heading">Kanıt sınırı</h2>
+        <ul class="boundary">
+          <li>Boyut kontrolü slicer çalıştırmadan STL geometrisini değerlendirir.</li>
+          <li>Dilimleme için <code>VERA_SLICER_BIN</code> ile gerçek motor yapılandırılmalıdır.</li>
+          <li>Bu arayüz fiziksel makine devreye alma veya üretim kalitesi kanıtı değildir.</li>
+        </ul>
+      </section>
     </div>
-  </div>
+  </section>
 
-  <div>
-    <h2>G1000 profili</h2>
-    <div class="card">
-      <div class="row"><span>Baski hacmi</span><span id="prof-volume">—</span></div>
-      <div class="row"><span>Nozul</span><span>&Oslash;5.0mm</span></div>
+  <section class="panel" aria-labelledby="operation-heading">
+    <h2 id="operation-heading">Model işlemi</h2>
+    <div class="field">
+      <label for="stl-path">STL dosya yolu</label>
+      <input type="text" id="stl-path" autocomplete="off" spellcheck="false" />
     </div>
-  </div>
-
-  <div>
-    <h2>Dilimle</h2>
-    <div class="card" style="display:flex; flex-direction:column; gap:8px;">
-      <input type="text" id="stl-path" placeholder="STL dosya yolu (mutlak)" />
+    <div class="field">
+      <label for="filament-select">Malzeme profili</label>
       <select id="filament-select"></select>
-      <button id="slice-btn">Dilimle</button>
-      <button class="secondary" id="validate-btn">Sadece boyut kontrolu</button>
     </div>
-  </div>
-
-  <div>
-    <h2>Son sonuc</h2>
-    <pre id="result-box">Henuz calistirilmadi.</pre>
-  </div>
-</div>
-
-<div id="main">
-  <div id="chat"></div>
-  <div id="composer">
-    <input type="text" id="chat-input" placeholder="Vera'ya bir sey sor..." />
-    <button id="send-btn">Gonder</button>
-  </div>
-</div>
+    <div class="actions">
+      <button type="button" id="validate-btn" class="secondary">Boyutu doğrula</button>
+      <button type="button" id="slice-btn">Dilimlemeyi başlat</button>
+    </div>
+    <div class="field" style="margin-top:20px;margin-bottom:0">
+      <label for="result-box">İşlem sonucu</label>
+      <pre id="result-box" role="status" aria-live="polite">Henüz işlem yapılmadı.</pre>
+    </div>
+  </section>
+</main>
 
 <script>
 const API = "";
 
-function addMsg(role, text) {
-  const chat = document.getElementById("chat");
-  const div = document.createElement("div");
-  div.className = "msg " + role;
-  div.textContent = text;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-}
-
 async function refreshHealth() {
   try {
-    const res = await fetch(API + "/health");
-    const data = await res.json();
-    document.getElementById("health-bin").textContent = data.exists ? "bulundu" : "eksik";
-    const dot = document.getElementById("status-dot");
-    const text = document.getElementById("health-text");
-    if (data.ok) {
-      dot.style.background = "var(--ok)";
-      text.textContent = "hazir";
-    } else {
-      dot.style.background = "var(--err)";
-      text.textContent = "yapilandirilmadi (binary yok)";
-    }
-  } catch (e) {
-    document.getElementById("health-text").textContent = "API'ye ulasilamiyor";
+    const response = await fetch(API + "/health");
+    const data = await response.json();
+    document.getElementById("health-bin").textContent = data.exists ? "Yapılandırıldı" : "Yapılandırılmadı";
+    document.getElementById("status-dot").style.background = data.ok ? "var(--ok)" : "var(--error)";
+    document.getElementById("health-text").textContent = "Erişilebilir";
+  } catch (error) {
+    document.getElementById("status-dot").style.background = "var(--error)";
+    document.getElementById("health-text").textContent = "Erişilemiyor";
   }
 }
 
 async function refreshProfiles() {
   try {
-    const res = await fetch(API + "/profiles");
-    const data = await res.json();
-    const v = data.build_volume_mm;
-    document.getElementById("prof-volume").textContent =
-      v.bed_x_mm + "x" + v.bed_y_mm + "x" + v.bed_z_mm + " mm";
-    const sel = document.getElementById("filament-select");
-    sel.innerHTML = "";
-    data.filaments.forEach((f) => {
-      const opt = document.createElement("option");
-      opt.value = f;
-      opt.textContent = f.toUpperCase();
-      sel.appendChild(opt);
-    });
-  } catch (e) { /* health check already reports the failure */ }
+    const response = await fetch(API + "/profiles");
+    const data = await response.json();
+    const volume = data.build_volume_mm;
+    document.getElementById("prof-volume").textContent = `${volume.bed_x_mm} × ${volume.bed_y_mm} × ${volume.bed_z_mm} mm`;
+    const select = document.getElementById("filament-select");
+    select.replaceChildren(...data.filaments.map((filament) => {
+      const option = document.createElement("option");
+      option.value = filament;
+      option.textContent = filament.toUpperCase();
+      return option;
+    }));
+  } catch (error) {
+    document.getElementById("prof-volume").textContent = "Alınamadı";
+  }
 }
 
-document.getElementById("validate-btn").addEventListener("click", async () => {
-  const stl = document.getElementById("stl-path").value.trim();
-  const box = document.getElementById("result-box");
-  if (!stl) { box.textContent = "Once bir STL yolu gir."; return; }
-  box.textContent = "Kontrol ediliyor...";
+async function submitOperation(endpoint, payload, pendingText) {
+  const result = document.getElementById("result-box");
+  result.textContent = pendingText;
   try {
-    const res = await fetch(API + "/validate", {
+    const response = await fetch(API + endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stl_path: stl }),
+      body: JSON.stringify(payload),
     });
-    box.textContent = JSON.stringify(await res.json(), null, 2);
-  } catch (e) { box.textContent = "Hata: " + e; }
-});
-
-document.getElementById("slice-btn").addEventListener("click", async () => {
-  const stl = document.getElementById("stl-path").value.trim();
-  const filament = document.getElementById("filament-select").value;
-  const box = document.getElementById("result-box");
-  if (!stl) { box.textContent = "Once bir STL yolu gir."; return; }
-  box.textContent = "Dilimleniyor (bu biraz surebilir)...";
-  try {
-    const res = await fetch(API + "/slice", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stl_path: stl, filament: filament }),
-    });
-    box.textContent = JSON.stringify(await res.json(), null, 2);
-  } catch (e) { box.textContent = "Hata: " + e; }
-});
-
-async function sendChat() {
-  const input = document.getElementById("chat-input");
-  const text = input.value.trim();
-  if (!text) return;
-  addMsg("user", text);
-  input.value = "";
-  // No LLM backend wired up yet -- honest placeholder, same pattern as the
-  // website's Vera (vormetra.com) when OPENAI_API_KEY is unset. This will
-  // call a real /vera/chat endpoint once a model/key is provisioned by the
-  // founder (see vormetra-slice/CLAUDE.md).
-  addMsg("vera", "Merhaba, ben Vera. Şu anda sohbet motorum yapılandırılmadı — ama soldaki panelden gerçek bir modeli dilimleyebilirim. STL yolunu gir ve “Dilimle”'ye bas.");
+    result.textContent = JSON.stringify(await response.json(), null, 2);
+  } catch (error) {
+    result.textContent = `İstek tamamlanamadı: ${error}`;
+  }
 }
 
-document.getElementById("send-btn").addEventListener("click", sendChat);
-document.getElementById("chat-input").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") sendChat();
+document.getElementById("validate-btn").addEventListener("click", () => {
+  const stlPath = document.getElementById("stl-path").value.trim();
+  if (!stlPath) {
+    document.getElementById("result-box").textContent = "Bir STL dosya yolu girin.";
+    return;
+  }
+  submitOperation("/validate", { stl_path: stlPath }, "Boyut doğrulanıyor…");
 });
 
-addMsg("system", "Vera Console baslatildi.");
-addMsg("vera", "Merhaba, ben Vera — VORMETRA Slice'in kontrol paneli. Soldan bir STL dosyasi verip G1000 icin dilimleyebilirsin.");
+document.getElementById("slice-btn").addEventListener("click", () => {
+  const stlPath = document.getElementById("stl-path").value.trim();
+  if (!stlPath) {
+    document.getElementById("result-box").textContent = "Bir STL dosya yolu girin.";
+    return;
+  }
+  submitOperation(
+    "/slice",
+    { stl_path: stlPath, filament: document.getElementById("filament-select").value },
+    "Dilimleme çalışıyor…",
+  );
+});
 
 refreshHealth();
 refreshProfiles();
 </script>
-
 </body>
 </html>

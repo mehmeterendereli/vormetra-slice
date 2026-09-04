@@ -3,7 +3,7 @@
 	"name": "VORMETRA PLA Pellet",
 	"inherits": "fdm_filament_common",
 	"from": "system",
-	"setting_id": "VORMETRA_PLA_pellet",
+	"setting_id": "b46jCiwmy4WqWPNl",
 	"instantiation": "true",
 	"filament_settings_id": [
 		"VORMETRA PLA Pellet"

@@ -3,7 +3,7 @@
 	"name": "VORMETRA G1000 5.0 nozzle",
 	"inherits": "VORMETRA_G1000_common",
 	"from": "system",
-	"setting_id": "VORMETRA_G1000_5_0",
+	"setting_id": "Pt14NtpdoOlPd6GO",
 	"instantiation": "true",
 	"printer_settings_id": "VORMETRA G1000 5.0 nozzle",
 	"printer_model": "VORMETRA G1000",

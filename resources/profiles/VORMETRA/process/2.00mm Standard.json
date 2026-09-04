@@ -1,9 +1,9 @@
 {
 	"type": "process",
-	"name": "2.00mm Standard",
+	"name": "2.00mm Standard @VORMETRA G1000",
 	"inherits": "fdm_process_common",
 	"from": "system",
-	"setting_id": "VORMETRA_2_00mm_standard",
+	"setting_id": "gX9WgsNSXjn4HXmb",
 	"instantiation": "true",
 	"print_settings_id": "2.00mm Standard @VORMETRA G1000",
 

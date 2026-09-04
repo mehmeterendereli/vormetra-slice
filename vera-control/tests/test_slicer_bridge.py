@@ -151,7 +151,7 @@ def test_slice_model_timeout_becomes_vera_slicer_error(tmp_path, monkeypatch):
     with pytest.raises(slicer_bridge.VeraSlicerError, match="timed out"):
         slicer_bridge.slice_model(str(stl_path), filament="petg")
 
-    # finally bloğu slot'u birakmis olmali → sonraki slice engellenmemiş
+    # The finally block must release the slot so a later slice is not blocked.
     assert slicer_bridge.is_slice_running() is False
 
 
@@ -229,9 +229,9 @@ _KLIPPER_MACRO_MARKERS = (
     reason="no slicer binary at VERA_SLICER_BIN -- set it to run the real integration test",
 )
 def test_slice_model_emits_marlin_gcode_not_klipper_macros():
-    """Control platform is LinuxCNC (ADR-060), not Klipper -- the external CAD
-    repo's fgf_post.py post-processor documents its input contract as plain
-    Marlin-flavor G-code (M104/M109, M82/M83, no vendor macros). If gcode_flavor
+    """The optional LinuxCNC converter requires plain Marlin-flavor G-code.
+
+    If gcode_flavor
     ever drifts back to "klipper" the profile will silently emit macro calls
     (e.g. PRINT_START/SET_PRESSURE_ADVANCE) that fgf_post.py's G-code word
     parser can't recognize and drops without warning."""
@@ -257,17 +257,15 @@ def test_slice_model_emits_marlin_gcode_not_klipper_macros():
     reason="no slicer binary at VERA_SLICER_BIN -- set it to run the real integration test",
 )
 @pytest.mark.skipif(
-    not config.FGF_POST_PATH.exists(),
-    reason="external CAD repo's fgf_post.py not found on this machine (read-only dependency)",
+    config.FGF_POST_PATH is None or not config.FGF_POST_PATH.exists(),
+    reason="VERA_FGF_POST_PATH is not configured for the optional conversion test",
 )
 def test_sliced_gcode_survives_fgf_post_linuxcnc_conversion():
-    """End-to-end chain check for OQ-08 / ACTION_PLAN 'VORMETRA Slice/Orca
-    profilini LinuxCNC U-ekseni post-process zinciriyle dogrula': slice a
-    test cube with the shipped VORMETRA profile, then feed the result
-    through the external CAD repo's fgf_post.py (read-only import; this
-    repo never writes into that directory). Must convert without a
-    fail-closed FGFPostError and must contain coordinated U-axis moves and
-    translated M68 heater setpoints."""
+    """Slice a cube, then exercise the explicitly configured LinuxCNC converter.
+
+    Conversion must fail closed on unsafe motion and produce coordinated U-axis
+    extrusion plus translated heater setpoints.
+    """
     import importlib.util
     import sys
 
@@ -280,6 +278,7 @@ def test_sliced_gcode_survives_fgf_post_linuxcnc_conversion():
         str(stl_path), filament="petg", output_dir=work_dir / "out_fgf_post_check"
     )
 
+    assert config.FGF_POST_PATH is not None
     spec = importlib.util.spec_from_file_location("fgf_post", config.FGF_POST_PATH)
     fgf_post = importlib.util.module_from_spec(spec)
     # dataclasses' @dataclass decorator resolves string annotations via

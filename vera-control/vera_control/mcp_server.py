@@ -1,7 +1,4 @@
-"""MCP server exposing VORMETRA Slice as native tools for Claude Code and any
-other MCP-compatible AI agent -- this is the direct answer to "kendin ve
-başka yapay zekaların da Slicer'ı kontrol edebilecek şekilde geliştir"
-(build it so you and other AIs can control the Slicer too).
+"""MCP server exposing VORMETRA Slice operations as typed tools.
 
 Run with: python -m vera_control.mcp_server
 Then point an MCP client's config at this command (stdio transport).
@@ -22,7 +19,7 @@ from . import config, slicer_bridge
 mcp = FastMCP(
     name="vormetra-slice",
     instructions=(
-        "Controls VORMETRA Slice, the AI-fed pellet/FGF 3D-printer slicer for "
+        "Controls VORMETRA Slice, the pellet/FGF 3D-printer slicer for "
         "the VORMETRA G1000. Use validate_model before slice_stl on anything "
         "you didn't already know fits the 1000x1000x1000mm bed."
     ),
@@ -53,8 +50,7 @@ def validate_model(stl_path: str) -> dict:
 def slice_stl(stl_path: str, filament: str = "petg") -> dict:
     """Slice an STL for the VORMETRA G1000 and return the resulting G-code
     stats plus the path to the generated .gcode.3mf. filament is one of
-    list_filaments()'s results (default 'petg', per OQ-03's recommendation
-    as the lower-risk first material)."""
+    list_filaments()'s results (default 'petg')."""
     result = slicer_bridge.slice_model(stl_path, filament=filament)
     return {
         "gcode_3mf_path": str(result.gcode_3mf_path),

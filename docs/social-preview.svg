@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title description">
+  <title id="title">VORMETRA Slice</title>
+  <desc id="description">Pellet and FGF slicing workspace with a G1000 profile and programmatic control layer.</desc>
+  <rect width="1280" height="640" fill="#efece4"/>
+  <rect x="0" width="20" height="640" fill="#bd4724"/>
+  <g transform="translate(92 84)">
+    <rect width="1088" height="472" rx="18" fill="none" stroke="#c9c2b6" stroke-width="2"/>
+    <path d="M706 84h306v248H706z M738 112h242v192H738z" fill="none" stroke="#28251e" stroke-width="5"/>
+    <path d="M738 304l48-46h146l48 46 M782 258v-96h154v96 M859 162v-42" fill="none" stroke="#bd4724" stroke-width="5"/>
+    <path d="M824 120h70 M848 86h22v34" fill="none" stroke="#28251e" stroke-width="5"/>
+    <path d="M782 214h154 M782 240h154" stroke="#8b8478" stroke-width="2" stroke-dasharray="8 8"/>
+    <text x="48" y="96" fill="#bd4724" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="700" letter-spacing="3">OPEN PELLET / FGF TOOLING</text>
+    <text x="44" y="184" fill="#28251e" font-family="Segoe UI, Arial, sans-serif" font-size="70" font-weight="750">VORMETRA</text>
+    <text x="46" y="252" fill="#28251e" font-family="Segoe UI, Arial, sans-serif" font-size="70" font-weight="750">SLICE</text>
+    <text x="48" y="310" fill="#655f54" font-family="Segoe UI, Arial, sans-serif" font-size="26">OrcaSlicer-based engine · G1000 profile</text>
+    <text x="48" y="352" fill="#655f54" font-family="Segoe UI, Arial, sans-serif" font-size="26">HTTP · MCP · Python control</text>
+    <line x1="48" y1="392" x2="1012" y2="392" stroke="#c9c2b6" stroke-width="2"/>
+    <text x="48" y="438" fill="#28251e" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="650">ACTIVE DEVELOPMENT</text>
+    <text x="330" y="438" fill="#655f54" font-family="Segoe UI, Arial, sans-serif" font-size="22">AGPLv3 engine/profile · MIT control layer</text>
+  </g>
+</svg>

@@ -1,112 +1,39 @@
-# CHANGELOG — VORMETRA Slice
+# Project history
 
-Format: [Keep a Changelog] esinli, tarih = ISO (YYYY-AA-GG). En yeni üstte.
-Yukarı akış (OrcaSlicer) commit geçmişi ayrı tutulur — bu dosya yalnızca
-VORMETRA katmanındaki değişiklikleri kaydeder.
+These entries describe repository milestones, not published binary releases. This repository currently has no tags, installer, executable release, or physically qualified production claim.
 
-## [0.1.3] — 2026-07-16
+## Unreleased — 2026-09-04
 
-### Düzeltildi (Fixed) — CTL-01 (Klipper vs LinuxCNC) zincir kırığı kapatıldı
-- Kontrol platformu ADR-060 (2026-07-09) ile LinuxCNC'ye kilitlendiği hâlde profil
-  hâlâ Ginger Additive'in Klipper şablonunu taşıyordu (`gcode_flavor: klipper` +
-  `START_PRINT`/`PRINT_START`/`END_PRINT`/`PRINT_END` makro çağrıları +
-  `enable_pressure_advance` → `SET_PRESSURE_ADVANCE`). Harici CAD reposundaki
-  post-processor (`fgf_post.py`, salt-okunur okundu) girdi sözleşmesini açıkça
-  "Marlin lehçesi" olarak belgeliyor; makro satırları onun G-code kelime
-  ayrıştırıcısına uymadığı için **sessizce düşüyordu** — ön-ısıtma sıcaklığı hiçbir
-  zaman `.ngc` çıktısına taşınmıyordu.
-- `gcode_flavor: klipper → marlin` (3 machine JSON'u); `machine_start_gcode`/
-  `machine_end_gcode` makro yerine düz M104/M109/G92 E0; `machine_pause_gcode`
-  (Klipper `PAUSE`) boşaltıldı (LinuxCNC pause sözleşmesi henüz tasarlanmadı, TBD);
-  `enable_pressure_advance: 1 → 0` (her iki filament — Klipper'a özgü, koordineli U
-  ekseni mimarisinde anlamsız/yanıltıcı).
-- Uçtan uca doğrulandı: resmi CLI ile 200×200×100mm test küpü yeniden dilimlendi
-  (50 katman, 2026-07-07 sonucuyla birebir), sıfır Klipper makro izi, gerçek
-  M104/M109 satırları; çıktı doğrudan `fgf_post.py`'den geçirildi — hatasız `.ngc`
-  (M68 E0 Q245/Q240/Q0 + koordineli U hareketleri). +2 kalıcı regresyon testi
-  (`test_slicer_bridge.py`, biri `VERA_FGF_POST_PATH` yoksa skip). Tam suite
-  **30 passed**. Detay: `resources/profiles/VORMETRA/README.md` "CTL-01 KAPANDI"
-  bölümü, ana repo `DECISIONS.md` ADR-129, `ACTION_PLAN.md`.
+- Reworked the public README, contribution guide, security policy, issue forms, and pull-request template around the VORMETRA product boundary.
+- Replaced internal coordination files and inherited OrcaSlicer account automation with public maintainer documentation.
+- Added deterministic VORMETRA profile verification and a hosted `vera-control` matrix for Ubuntu and Windows on Python 3.10 and 3.13.
+- Constrained the MCP dependency to the supported 1.x API and added a real stdio client handshake test.
+- Removed machine-specific default paths; runtime binaries, profile roots, data directories, and optional conversion code are configured through environment variables.
+- Added explicit HTTP host/origin protection, portable safety tests, and an accessible local operations console.
+- Assigned deterministic profile setting identifiers and aligned the process profile name with the VORMETRA G1000.
+- Reverified the 32-test software suite with an official OrcaSlicer v2.4.2 portable binary, the current repository profiles, and an explicitly configured external converter.
 
-## [0.1.2] — 2026-07-10
+## 0.1.3 — 2026-07-16
 
-### Düzeltildi (Fixed) — bug-hunt turunda doğrulanan 5 gerçek bug (vera-control)
-- **Güvenlik — localhost drive-by CSRF (`api.py`):** kimliksiz yerel API + wildcard
-  `Access-Control-Allow-Origin: *` yüzünden herhangi bir kötücül web sayfası
-  `POST /slice` ile keyfi `stl_path`'i yerel subprocess+disk'e geçirebiliyordu.
-  Wildcard CORS kaldırıldı + `do_POST`'a Origin/Host loopback kontrolü (CSRF +
-  DNS-rebinding). Aynı-origin Vera Console etkilenmez.
-- **`slicer_bridge._pid_is_running`:** Windows'ta `os.kill(pid, 0)` canlılık kontrolü
-  değil (CTRL_C_EVENT==0 → ölü PID'e True); ölü `slice.lock` asla temizlenmiyordu
-  (kalıcı sahte-meşgul 409). `OpenProcess`+`GetExitCodeProcess` dalı eklendi.
-- **`_slice_lock_is_active`:** bozuk/eksik kilit dosyasında koşulsuz `True` → kilit
-  asla temizlenmiyordu. Bozuk kilit temizlenir; yabancı-OS kilidi için mtime-TTL failsafe.
-- **`slice_model`:** `subprocess.run` `TimeoutExpired`'i yakalanmıyordu → "her hata
-  VeraSlicerError döner" sözleşmesi büyük modelde bozuluyordu. `→ VeraSlicerError` (API 422).
-- **`_read_slice_lock`:** `except OSError` `UnicodeDecodeError`'ı kaçırıp ASCII-dışı
-  baytlı kilitte `is_slice_running()`/`GET /health`'i çökertiyordu. `→ except (OSError,
-  UnicodeDecodeError)`.
-- Testler: +8 yeni test (gerçek ölü-PID, bozuk/non-ASCII kilit, timeout→hata, cross-origin/
-  DNS-rebind 403). Tam suite **27 passed, 1 skipped**. Kaynak: ana repo
-  `docs/BUG_HUNT_SATELLITE_20260710.md`. Lisans değişmez (motor AGPLv3, vera-control MIT).
+- Changed the VORMETRA profile from Klipper-specific macros to plain Marlin-flavour G-code for the optional LinuxCNC conversion boundary.
+- Added regression coverage for absence of Klipper macros and for explicitly configured conversion.
+- Local software verification exercised a 200 × 200 × 100 mm fixture. This did not establish commissioning, dimensional accuracy, throughput, surface quality, or machine reliability.
 
-## [0.1.1] — 2026-07-08
+## 0.1.2 — 2026-07-10
 
-### Değiştirildi (Changed) — Açık kaynak yapıldı (ADR-047, ana repo)
-- Bu repo **public** yapıldı. Motor + `resources/profiles/VORMETRA/` AGPLv3
-  altında kalıyor (yukarı akıştan devralınan lisans) — repo public olduğu
-  için dağıtımda kaynak-açma yükümlülüğü baştan karşılanmış durumda.
-- `vera-control/` ayrıca **MIT** ile lisanslandı (`vera-control/LICENSE`) —
-  AGPL bunu zorunlu kılmıyordu, kurucu topluluk katkısı için tercih etti.
-- `README.md`/`CLAUDE.md`/`AGENTS.md` bu kararı yansıtacak şekilde güncellendi.
+- Rejected cross-origin and non-loopback state-changing HTTP requests.
+- Corrected Windows process-liveness detection and stale, malformed, and cross-platform slice-lock recovery.
+- Converted slicer timeouts and malformed lock content into explicit control-layer errors.
+- Expanded portable regression coverage for these behaviours.
 
-## [0.1.0] — 2026-07-07
+## 0.1.1 — 2026-07-08
 
-### Eklendi (Added)
-- Fork başlatıldı: `github.com/OrcaSlicer/OrcaSlicer` tam git geçmişiyle
-  klonlandı, `upstream` remote olarak eklendi (`git fetch upstream` ile
-  gelecekte senkron edilebilir), `origin` bu repoya (private) işaret ediyor.
-- `resources/profiles/VORMETRA/` — G1000 vendor profili: makine (1000×1000×1000mm,
-  Ø5.0 nozül, Klipper gcode_flavor), 2 malzeme (PETG — OQ-03 önerilen ilk
-  malzeme, PLA), process profili. **Resmi OrcaSlicer v2.4.2 ile uçtan uca
-  gerçek dilimleme testiyle doğrulandı** (200×200×100mm test küpü → doğru
-  katman sayısı, doğru ekstrüzyon genişliği, doğru pellet flow matematiği,
-  doğru bed_shape). 4 gerçek CLI/profil hatası bulunup düzeltildi — detay:
-  `resources/profiles/VORMETRA/README.md`.
-- `vera-control/` — AI-kontrol katmanı: `slicer_bridge.py` (CLI wrapper),
-  `api.py` (stdlib HTTP API + Vera Console statik dosya sunumu), `mcp_server.py`
-  (Claude Code + diğer MCP-uyumlu ajanlar için native araçlar:
-  `list_filaments`/`get_machine_limits`/`validate_model`/`slice_stl`).
-  14 test (pytest), gerçek motora karşı da doğrulandı. Web konsolu
-  (`vera_control/console/index.html`) tarayıcıda canlı test edildi (health
-  check, profil listesi, gerçek dilimleme çağrısı — hepsi uçtan uca çalıştı).
-- Marka: `version.inc` (`SLIC3R_APP_NAME`/`SLIC3R_APP_KEY` → "VORMETRA Slice"),
-  root `README.md` VORMETRA'ya özel yeniden yazıldı (orijinali
-  `README.upstream.md`'de korundu). Native GUI (About dialog, splash) rebrand'i
-  **henüz yapılmadı** — bilinçli kapsam dışı (bkz. CLAUDE.md).
-- `CLAUDE.md`/`AGENTS.md` — bu reponun işletim tüzüğü (ana bilgi tabanı
-  reposundaki desenle aynı; C++ çekirdeği için yukarı akışın kendi
-  derleme/test/kod-stili notları korunup entegre edildi).
+- Published the OrcaSlicer-derived engine and VORMETRA profiles under the repository's AGPLv3 licence.
+- Added the separate MIT licence for `vera-control`, which invokes the slicer through a process boundary.
 
-### Tamamlandı (2026-07-17): kaynaktan TAM DERLEME — native GUI üretildi
-- `build_release_vs2022.bat` uçtan uca BAŞARILI (BITTI exit=0, 16:03):
-  `build/OrcaSlicer/orca-slicer.exe` + tam kurulum ağacı üretildi.
-  Üç katmanlı kök neden zinciri sırayla çözüldü:
-  1. **NASM yok** → resmî nasm.us 2.16.03 taşınabilir zip (C:/Users/pc/Tools/nasm-2.16.03).
-  2. **perl PATH'te yok** → Git'in perl'i eklendi, AMA...
-  3. **perl TÜRÜ yanlış** — OpenSSL native Windows (VC-WIN64A) derlemesi MSYS
-     perl'i reddediyor ("This Perl version ... x86_64-msys"). Çözüm: taşınabilir
-     **Strawberry Perl 5.38.2.2** (C:/Users/pc/Tools/strawberry, MSWin32-x64).
-  Gelecek derlemeler için PATH önü: nasm-2.16.03 + strawberry/perl/bin.
-  Not: GUI'nin ilk elle duman/rebrand kontrolü henüz yapılmadı (ayrı iş).
+## 0.1.0 — 2026-07-07
 
-### Bilinen eksikler / sonraki adımlar
-- `pellet_flow_coefficient` gerçek G1000'de kalibre edilmedi (nötr "1"
-  değerinde — TBD).
-- Native GUI'ye gömülü Vera sohbet paneli yok (C++ işi, ayrı kapsam).
-- `machine_start_gcode`'daki 4-bölge/vida-hacmi parametreli tam makro
-  sadeleştirildi (vanilla OrcaSlicer'da özel değişken kaydı yok) — CTL-01
-  (Klipper vs LinuxCNC) netleşince ve firmware makro tasarımı yapılınca
-  genişletilecek.
-- Vera Console'un LLM sohbet motoru henüz bağlı değil (API anahtarı §3,
-  kurucuya ait — ADR-017 emsali).
+- Added the initial G1000 machine, process, and pellet profiles.
+- Added the `vera-control` HTTP, MCP, and direct Python interfaces.
+- Preserved the original OrcaSlicer overview as `README.upstream.md`.
+- Established the 1000 × 1000 × 1000 mm envelope and 5.0 mm nozzle as configuration inputs. They are not measured physical outcomes.

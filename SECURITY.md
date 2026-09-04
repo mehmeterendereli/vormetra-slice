@@ -1,47 +1,24 @@
-# Security Policy
+# Security policy
 
-At OrcaSlicer, we are committed to maintaining the security of our ecosystem. Our policy is to ensure that we do not introduce vulnerabilities and that any security issues are addressed promptly and responsibly. We appreciate your help in improving the security of OrcaSlicer and thank you for your responsible disclosure.
-Reporting Security Bugs
+## Supported scope
 
-## To report a security bug, please follow these guidelines:
+This repository accepts reports for the VORMETRA G1000 profiles, VORMETRA-specific integrations, and the `vera-control` HTTP, MCP, and direct Python interfaces.
 
-  * Email Security Bugs:
-        Send an email to the lead maintainer at softfeverever@gmail.com.
-        Include the word "SECURITY" in the subject line of your email.
+If a defect also reproduces in an unmodified OrcaSlicer checkout, use the [OrcaSlicer security policy](https://github.com/OrcaSlicer/OrcaSlicer/security/policy). When the boundary is unclear, report it here first so the maintainer can route it without exposing details.
 
-  * Response Times:
-        The lead maintainer will acknowledge receipt of your email within one week (7 days).
-        A detailed response will follow within 48 hours, outlining the next steps for handling your report.
-        After the initial reply, the security team will keep you informed about the progress toward a fix and any announcements.
+## Private reporting
 
-  * Information and Collaboration:
-        We may request additional information or guidance as we work on addressing the issue.
+Do not disclose vulnerability details in a public issue. Use [GitHub private vulnerability reporting](https://github.com/mehmeterendereli/vormetra-slice/security/advisories/new).
 
-  * Handling the Report:
-        OrcaSlicer will confirm the problem and determine the affected versions.
-        We will audit the code to find any similar issues and prepare fixes for all releases still under maintenance.
-        Fixes will be released as quickly as possible.
+Include, when available:
 
-  * Third-Party Modules:
-        Report security issues in third-party modules to the respective maintainer of those modules.
+- the affected commit and component;
+- minimal reproduction conditions;
+- the expected security impact;
+- a proposed mitigation.
 
-## Security Disclosure Guidelines
+Redact credentials, customer data, real machine identifiers, private models, and local filesystem paths. If the private reporting link is unavailable, open a public issue without technical details and request a private channel.
 
-When disclosing a vulnerability, please follow these steps to ensure your report is clear and actionable:
+## Runtime boundary
 
-  * Provide Detailed Information:
-        Scope: Clearly define the scope of the vulnerability.
-        Potential Impact: Let us know who could be affected by this exploit.
-        Reproduction Steps: Document detailed steps to reproduce the vulnerability.
-
-    Reference OWASP Guidelines:
-        Follow the <a href="https://cheatsheetseries.owasp.org/cheatsheets/Vulnerability_Disclosure_Cheat_Sheet.html">OWASP Vulnerability Disclosure Cheat Sheet</a> for best practices in vulnerability disclosure.
-
-## Security Recommendations
-
-To enhance security when using OrcaSlicer, we recommend following these steps:
-
-  * SEE SOMETHING: If you notice anything suspicious or have concerns, please report it.
-  * SAY SOMETHING: If you have any doubts or need assistance, do not hesitate to contact us.
-
-### Thank you for your commitment to the security of OrcaSlicer. Your efforts help us maintain a safe and reliable ecosystem.
+`vera-control` binds its development server to loopback by default. It does not provide authentication or TLS and must not be exposed to an untrusted network. A successful software test does not establish the safety of physical-machine motion, heating, extrusion, or emergency-stop behaviour.
