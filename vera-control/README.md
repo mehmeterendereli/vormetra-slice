@@ -1,5 +1,7 @@
 # vera-control
 
+[![vera-control verification](https://github.com/mehmeterendereli/vormetra-slice/actions/workflows/vera-control.yml/badge.svg)](https://github.com/mehmeterendereli/vormetra-slice/actions/workflows/vera-control.yml)
+
 AI-controllable control layer for VORMETRA Slice. Wraps the slicer engine's
 CLI so that Claude Code, other AI agents, and the embedded "Vera" assistant
 can drive it programmatically instead of only through the desktop GUI.
@@ -52,10 +54,21 @@ python -m vera_control.mcp_server # MCP server (stdio transport)
 python -m pytest -q
 ```
 
-The real-engine integration test (`test_slice_model_real_binary_end_to_end`)
-auto-skips if `VERA_SLICER_BIN` isn't set to an existing file -- everything
-else (bridge logic, HTTP API, STL bounding-box math) runs with no engine
-required.
+The same portable suite runs automatically on:
+
+- Ubuntu with Python 3.10 and 3.13
+- Windows with Python 3.10 and 3.13
+
+CI first compiles the package, then runs the control bridge, HTTP API,
+profile-safety and STL tests. The workflow uses sparse checkout, so it verifies
+this layer and the VORMETRA profile tree without downloading or compiling the
+entire OrcaSlicer C++ workspace.
+
+The real-engine integration tests auto-skip when `VERA_SLICER_BIN` is not set
+to an existing file. The LinuxCNC conversion test also requires
+`VERA_FGF_POST_PATH`. Those skips are intentional and visible: a green badge
+proves the portable bridge/profile suite, not physical-machine commissioning
+or an external integration that was unavailable on the runner.
 
 ## Runtime safety
 
