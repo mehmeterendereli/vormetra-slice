@@ -15,6 +15,7 @@ on:
      - 'resources/**'
      - ".github/workflows/build_*.yml"
      - 'scripts/flatpak/**'
+     - 'scripts/check_packaging_identity.py'
      - 'scripts/msix/**'
      - 'tests/**'
 
@@ -34,6 +35,7 @@ on:
      - 'build_release_vs2022.bat'
      - 'build_release_macos.sh'
      - 'scripts/flatpak/**'
+     - 'scripts/check_packaging_identity.py'
      - 'scripts/msix/**'
      - 'tests/**'
 
@@ -50,7 +52,24 @@ concurrency:
   
 
 jobs:
+  packaging_identity:
+    name: Validate packaging identity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out packaging configuration
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            version.inc
+            resources/images
+            scripts/flatpak
+            scripts/check_packaging_identity.py
+      - name: Verify configured Linux package assets
+        run: python3 scripts/check_packaging_identity.py
+
   build_linux:
+    needs: packaging_identity
     strategy:
       fail-fast: false
       # Build both arches on every event (PRs included), through the same
@@ -74,6 +93,7 @@ jobs:
     secrets: inherit
   build_windows:
     name: Build Windows ${{ matrix.arch }}
+    needs: packaging_identity
     strategy:
       fail-fast: false
       matrix:
@@ -93,6 +113,7 @@ jobs:
       force-build: ${{ github.event_name == 'schedule' }}
     secrets: inherit
   build_macos_arch:
+    needs: packaging_identity
     strategy:
       fail-fast: false
       matrix:
@@ -167,6 +188,7 @@ jobs:
         with:
           name: ${{ github.sha }}-tests
   flatpak:
+    needs: packaging_identity
     name: "Flatpak"
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-50
