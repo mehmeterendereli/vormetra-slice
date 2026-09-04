@@ -1,88 +1,114 @@
 # vera-control
 
-AI-controllable control layer for VORMETRA Slice. Wraps the slicer engine's
-CLI so that Claude Code, other AI agents, and the embedded "Vera" assistant
-can drive it programmatically instead of only through the desktop GUI.
+`vera-control` is the MIT-licensed programmatic control layer for VORMETRA Slice. It wraps the OrcaSlicer-derived command-line interface once and exposes the same operations through HTTP, stdio MCP, and direct Python imports.
 
-**License:** MIT (see `LICENSE` in this directory) -- separate from the
-engine's AGPLv3 (root `LICENSE.txt`). This is a standalone program that talks
-to the engine over a CLI/subprocess boundary, not a linked derivative of it,
-so it isn't required to be AGPL; VORMETRA chose to open it under MIT anyway
-for community contribution (founder decision, 2026-07-07 -- see the main
-knowledge-base repo's `DECISIONS.md` ADR-047).
+**Status:** the portable test suite and all three entry paths are runnable. A real slice still requires an explicitly configured slicer binary. Physical-machine behaviour is outside this package's evidence boundary.
 
-Three ways in, same underlying `vera_control.slicer_bridge`:
+## Install and verify
 
-- **HTTP API** (`vera_control/api.py`, stdlib only, no new dependency) --
-  `/health`, `/profiles`, `/validate`, `/slice`. Also serves the Vera
-  Console web UI at `/`.
-- **MCP server** (`vera_control/mcp_server.py`, needs the `mcp` package) --
-  `list_filaments`, `get_machine_limits`, `validate_model`, `slice_stl` as
-  native tools for any MCP-compatible AI client (Claude Code included).
-- **Direct import** -- `from vera_control import slicer_bridge` and call
-  `slicer_bridge.slice_model(...)` yourself.
+Python 3.10 or newer is required.
 
-## Setup
-
-```
+```bash
 cd vera-control
-python -m pip install -e ".[dev]"        # core + pytest
-python -m pip install -e ".[mcp]"        # only if you need the MCP server
-```
-
-Point the layer at a real engine binary (our own build once
-`build/src/Release/orca-slicer.exe` exists, or the official portable build
-for prototyping):
-
-```
-set VERA_SLICER_BIN=C:\path\to\orca-slicer.exe
-set VERA_PROFILES_DIR=C:\path\to\resources\profiles   # must contain VORMETRA/
-```
-
-## Run
-
-```
-python run_dev.py                 # HTTP API + Vera Console on :8765
-python -m vera_control.mcp_server # MCP server (stdio transport)
-```
-
-## Test
-
-```
+python -m pip install -e ".[dev]"
+python -m pip check
 python -m pytest -q
 ```
 
-The portable suite covers the control bridge, HTTP API, profile safety, STL
-parsing, process locking, stale/corrupt lock recovery, timeout handling, G-code
-header parsing and archive repair. It runs without compiling the C++ desktop
-application.
+The development extra includes the supported MCP 1.x dependency so CI verifies the stdio server with a real client handshake. The `mcp` extra remains available for runtime-only installations:
 
-A four-cell Ubuntu/Windows, Python 3.10/3.13 workflow definition is committed at
-`.github/workflows/vera-control.yml`. GitHub has not emitted a workflow run for
-this repository configuration yet, so no green badge is shown and the matrix is
-not presented as executed evidence. Until repository Actions are enabled, use
-the local command above as the authoritative portable verification path.
+```bash
+python -m pip install -e ".[mcp]"
+```
 
-The real-engine integration tests auto-skip when `VERA_SLICER_BIN` is not set
-to an existing file. The LinuxCNC conversion test also requires
-`VERA_FGF_POST_PATH`. Those skips are intentional and visible: neither a local
-portable-suite pass nor a future green matrix proves physical-machine
-commissioning or an external integration that was unavailable on the runner.
+## Configuration
+
+Runtime paths are environment variables, not source-code defaults.
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `VERA_SLICER_BIN` | OrcaSlicer-compatible executable | Repository `build/src/Release/orca-slicer.exe` |
+| `VERA_PROFILES_DIR` | Profile root containing `VORMETRA/` | Repository `resources/profiles` |
+| `VERA_DATA_DIR` | Locks and generated output | `vera-control/.vera-datadir` |
+| `VERA_FGF_POST_PATH` | Optional reviewed LinuxCNC converter file | Unset |
+| `VERA_HOST` | HTTP bind host | `127.0.0.1` |
+| `VERA_PORT` | HTTP port | `8765` |
+
+Example from the repository root on Windows:
+
+```powershell
+$env:VERA_SLICER_BIN = (Resolve-Path ".\build\src\Release\orca-slicer.exe")
+$env:VERA_PROFILES_DIR = (Resolve-Path ".\resources\profiles")
+$env:VERA_DATA_DIR = (Join-Path $env:TEMP "vera-control-data")
+Set-Location .\vera-control
+```
+
+## HTTP API and console
+
+```bash
+python run_dev.py
+```
+
+Open `http://127.0.0.1:8765/` for the local console.
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/health` | Runtime configuration and slice-lock state |
+| `GET` | `/profiles` | Available filaments and software envelope |
+| `POST` | `/validate` | STL bounding-box validation without slicing |
+| `POST` | `/slice` | Real slice with the configured binary |
+
+Example validation request:
+
+```powershell
+$body = @{ stl_path = (Resolve-Path ".\model.stl") } | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8765/validate" -ContentType "application/json" -Body $body
+```
+
+The server is a local development interface. It checks loopback `Host` and `Origin` values for state-changing requests, but it does not provide authentication or TLS. Do not bind it to an untrusted network.
+
+## MCP
+
+```bash
+python -m vera_control.mcp_server
+```
+
+The stdio server exposes:
+
+- `list_filaments`
+- `get_machine_limits`
+- `validate_model`
+- `slice_stl`
+
+The dependency is intentionally constrained to `mcp>=1,<2` because this release uses the 1.x `FastMCP` API. The test suite starts the module as a subprocess, completes an MCP client initialization, lists the four tools, and calls the two non-destructive metadata tools.
+
+## Direct Python API
+
+```python
+from vera_control import slicer_bridge
+
+print(slicer_bridge.list_filaments())
+result = slicer_bridge.validate_model("model.stl")
+if result["fits"]:
+    sliced = slicer_bridge.slice_model("model.stl", filament="petg")
+    print(sliced.stats)
+```
+
+`slice_model()` rejects unknown materials, missing inputs, competing slice jobs, and unavailable binaries with explicit exceptions. It never reports a half-created artifact as success.
+
+## Evidence layers
+
+- **Portable:** STL parsing, profile safety, HTTP behaviour, MCP startup, locks, timeouts, G-code header parsing, and archive repair.
+- **Real slicer:** enabled only when `VERA_SLICER_BIN` resolves to a file.
+- **External conversion:** enabled only when `VERA_FGF_POST_PATH` resolves to the reviewed converter.
+- **Physical machine:** not exercised or implied by this package.
+
+The hosted workflow runs the portable suite on Ubuntu and Windows with Python 3.10 and 3.13. Optional dependency skips remain visible in pytest output and are not counted as real-engine or physical evidence.
 
 ## Runtime safety
 
-`vera_control.slicer_bridge` allows only one real slicer process at a time,
-using both an in-process lock and a `slice.lock` file under `VERA_DATA_DIR`. A
-second `/slice` request returns HTTP 409 instead of queueing another heavy
-engine job, and Windows launches use below-normal process priority where the
-platform exposes it. This is intentional: large G1000 jobs can make a desktop
-unresponsive if multiple agents submit work concurrently.
+Only one real slicer process may run at a time. An in-process lock plus a `slice.lock` file under `VERA_DATA_DIR` prevents accidental parallel jobs; a competing HTTP request returns `409`. On Windows, the bridge uses below-normal process priority when available. Stale, malformed, and cross-platform lock files have explicit recovery behaviour covered by tests.
 
-## The CLI gotchas this layer exists to hide
+## License
 
-`slicer_bridge.py`'s docstring and `resources/profiles/VORMETRA/README.md`
-document the real bugs found and fixed while building this: profile inheritance
-gaps in direct CLI file loading, pellet diameter conversion, undefined custom
-placeholder variables, copied network endpoints, invalid exclusion geometry,
-and headless thumbnail gaps. If slicing starts failing again after an engine
-upgrade, check there first before assuming the profile JSON is wrong.
+`vera-control` is available under the [MIT License](LICENSE). The OrcaSlicer-derived engine and VORMETRA profiles at the repository root remain under [AGPLv3](../LICENSE.txt).

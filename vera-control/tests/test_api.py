@@ -53,6 +53,16 @@ def test_profiles_endpoint(server):
     assert body["build_volume_mm"]["bed_x_mm"] == 1000.0
 
 
+def test_console_is_operational_and_has_no_unconfigured_chat(server):
+    with urllib.request.urlopen(f"{server}/", timeout=5) as response:
+        html = response.read().decode("utf-8")
+    assert response.status == 200
+    assert "<title>Vera Console — VORMETRA Slice</title>" in html
+    assert 'for="stl-path"' in html
+    assert "chat-input" not in html
+    assert "Claude" not in html
+
+
 def test_validate_missing_stl_path(server):
     status, body = _post(f"{server}/validate", {})
     assert status == 400

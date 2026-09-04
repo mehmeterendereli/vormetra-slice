@@ -1,6 +1,4 @@
-"""Thin wrapper around the OrcaSlicer-derived CLI so any AI agent (or the
-embedded Vera panel) can slice a model without knowing the exact, somewhat
-unforgiving CLI incantation.
+"""Thin wrapper around the OrcaSlicer-derived CLI.
 
 The invocation and the profile-authoring gotchas it works around are
 documented in ``resources/profiles/VORMETRA/README.md`` -- notably: critical

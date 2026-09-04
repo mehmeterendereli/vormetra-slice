@@ -53,4 +53,5 @@ __pycache__/
 vera-control/.vera-datadir/
 vera-control/*.egg-info/
 vera-control/.pytest_cache/
+vera-control/.pytest_tmp/
 run_build.bat

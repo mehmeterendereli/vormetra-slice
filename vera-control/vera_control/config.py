@@ -18,6 +18,11 @@ def _env_path(name: str, default: Path) -> Path:
     return Path(value) if value else default
 
 
+def _optional_env_path(name: str) -> Path | None:
+    value = os.environ.get(name)
+    return Path(value) if value else None
+
+
 SLICER_BIN = _env_path(
     "VERA_SLICER_BIN",
     REPO_ROOT / "build" / "src" / "Release" / "orca-slicer.exe",
@@ -32,23 +37,16 @@ DEFAULT_MACHINE = VORMETRA_PROFILES_DIR / "machine" / "VORMETRA G1000 5.0 nozzle
 DEFAULT_PROCESS = VORMETRA_PROFILES_DIR / "process" / "2.00mm Standard.json"
 DEFAULT_FILAMENT = VORMETRA_PROFILES_DIR / "filament" / "VORMETRA PETG Pellet.json"
 
-# Read-only dependency on the external CAD/control repo's post-processor (CLAUDE.md
-# WORKING_PROTOCOL: VORMETRA never writes there, but importing/running its published
-# fgf_post.py contract to validate the slicer->LinuxCNC chain is fine). Local-machine
-# path only -- no CI, mirrors SLICER_BIN's own local-prototype default above.
-FGF_POST_PATH = _env_path(
-    "VERA_FGF_POST_PATH",
-    Path(r"C:\Users\pc\Desktop\dp-fgf-1000-v2-parametric\V2\slicer\fgf_post.py"),
-)
+# Optional read-only LinuxCNC conversion integration. There is intentionally no
+# machine-specific default: callers must opt in with VERA_FGF_POST_PATH.
+FGF_POST_PATH = _optional_env_path("VERA_FGF_POST_PATH")
 
 FILAMENT_CHOICES = {
     "petg": VORMETRA_PROFILES_DIR / "filament" / "VORMETRA PETG Pellet.json",
     "pla": VORMETRA_PROFILES_DIR / "filament" / "VORMETRA PLA Pellet.json",
 }
 
-# From TECHNICAL_REQUIREMENTS.md / g1000-profile-spec.md in the main knowledge-base
-# repo -- kept here too so validate() doesn't need the slicer to reject an
-# obviously-oversized model.
+# Software envelope used by validate_model() before the slicer is invoked.
 MACHINE_LIMITS = {
     "bed_x_mm": 1000.0,
     "bed_y_mm": 1000.0,

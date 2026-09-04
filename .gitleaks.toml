@@ -1,0 +1,14 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Windows exception constants are not an API credential"
+condition = "AND"
+paths = ['''^src/slic3r/GUI/BackgroundSlicingProcess\.cpp$''']
+regexes = ['''STATUS_ACCESS_VIOLATION''']
+
+[[allowlists]]
+description = "Expired ScienceDirect request signature in untouched upstream MCUT reference"
+condition = "AND"
+targetRules = ["aws-access-token"]
+paths = ['''^deps_src/mcut/source/math\.cpp$''']

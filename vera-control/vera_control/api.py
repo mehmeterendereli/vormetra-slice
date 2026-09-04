@@ -8,9 +8,8 @@ Endpoints (all JSON in/out unless noted):
   POST /slice                -> {"stl_path": "...", "filament": "petg"} => stats + gcode_3mf_path
   GET  /                     -> Vera Console (static HTML/JS)
 
-This is the layer any AI agent (Claude Code, another LLM, or the embedded
-Vera chat panel once it exists in the GUI) can drive over plain HTTP. See
-mcp_server.py for the same capabilities exposed as native MCP tools.
+The server binds to loopback by default. See ``mcp_server.py`` for the same
+capabilities over stdio MCP transport.
 """
 from __future__ import annotations
 
