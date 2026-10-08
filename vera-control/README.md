@@ -21,6 +21,26 @@ The development extra includes the supported MCP 1.x dependency so CI verifies t
 python -m pip install -e ".[mcp]"
 ```
 
+## Portable first result
+
+Run a complete, non-destructive validation path before configuring a slicer
+binary or finding an STL:
+
+```bash
+python examples/portable_validation.py
+```
+
+The demo creates a closed 200 x 200 x 100 mm STL in a temporary directory,
+lists the available pellet profiles, validates the model against the G1000
+software envelope, prints the result as JSON, and removes the fixture. It does
+not invoke the slicer or claim physical-machine evidence.
+
+Pass your own model to exercise the same path without creating the fixture:
+
+```bash
+python examples/portable_validation.py path/to/model.stl
+```
+
 ## Configuration
 
 Runtime paths are environment variables, not source-code defaults.

@@ -28,9 +28,10 @@ git clone https://github.com/mehmeterendereli/vormetra-slice.git
 cd vormetra-slice/vera-control
 python -m pip install -e ".[dev]"
 python -m pytest -q
+python examples/portable_validation.py
 ```
 
-The portable command is non-destructive and does not require the C++ desktop application. Tests that need `VERA_SLICER_BIN` or `VERA_FGF_POST_PATH` report a skip when the dependency is not configured; a skip is not a pass for that evidence layer.
+The portable commands are non-destructive and do not require the C++ desktop application. The demo generates a temporary 200 x 200 x 100 mm fixture, validates it through the public Python layer and removes it. Tests that need `VERA_SLICER_BIN` or `VERA_FGF_POST_PATH` report a skip when the dependency is not configured; a skip is not a pass for that evidence layer.
 
 ## Architecture
 
