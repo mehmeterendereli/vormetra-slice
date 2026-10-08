@@ -1,0 +1,67 @@
+From ae49cb4717a8059a89a3429adeebe70d4437dc34 Mon Sep 17 00:00:00 2001
+From: Codex <codex@openai.com>
+Date: Thu, 8 Oct 2026 19:05:58 +0300
+Subject: [PATCH] fix: lift SparkX nozzle after purge line
+
+---
+ .../Creality/machine/Creality SPARKX i7 0.2 nozzle.json         | 2 +-
+ .../Creality/machine/Creality SPARKX i7 0.4 nozzle.json         | 2 +-
+ .../Creality/machine/Creality SPARKX i7 0.6 nozzle.json         | 2 +-
+ .../Creality/machine/Creality SPARKX i7 0.8 nozzle.json         | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/resources/profiles/Creality/machine/Creality SPARKX i7 0.2 nozzle.json b/resources/profiles/Creality/machine/Creality SPARKX i7 0.2 nozzle.json
+index 8f622d0..8211c54 100644
+--- a/resources/profiles/Creality/machine/Creality SPARKX i7 0.2 nozzle.json	
++++ b/resources/profiles/Creality/machine/Creality SPARKX i7 0.2 nozzle.json	
+@@ -59,7 +59,7 @@
+ 	"machine_pause_gcode": "PAUSE",
+ 	"machine_platform_motion_enable": "0",
+ 	"machine_ptc_exist": "0",
+-	"machine_start_gcode": "M140 S0\nM104 S0 \nSTART_PRINT EXTRUDER_TEMP=[nozzle_temperature_initial_layer] BED_TEMP=[bed_temperature_initial_layer_single]\nM83 \nM8200 P S[initial_no_support_extruder]\nM220 S100\n\nSET_VELOCITY_LIMIT ACCEL=5000 ACCEL_TO_DECEL=5000\nG0 X267 F18000 \nG0 X278 F2400\nM109 S[nozzle_temperature_initial_layer]\nM106 S0\nT[initial_no_support_extruder]\n\nM8200 O\nM204 S2000\nG1 Z3 F600\nM83\nG1 Y0 F12000\nG1 X150 F30000\nG1 Z0.2 F600\nG1 X120 Y0 E15 F{filament_max_volumetric_speed[initial_extruder]/0.3*60*0.1}\nG1 X115 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG1 X110 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)*60}\nG1 X105 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG1 X100 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)*60}\nG1 X95 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG91\nG1 X-1 Z-0.3\nG1 X-4\nG92 E0",
++	"machine_start_gcode": "M140 S0\nM104 S0 \nSTART_PRINT EXTRUDER_TEMP=[nozzle_temperature_initial_layer] BED_TEMP=[bed_temperature_initial_layer_single]\nM83 \nM8200 P S[initial_no_support_extruder]\nM220 S100\n\nSET_VELOCITY_LIMIT ACCEL=5000 ACCEL_TO_DECEL=5000\nG0 X267 F18000 \nG0 X278 F2400\nM109 S[nozzle_temperature_initial_layer]\nM106 S0\nT[initial_no_support_extruder]\n\nM8200 O\nM204 S2000\nG1 Z3 F600\nM83\nG1 Y0 F12000\nG1 X150 F30000\nG1 Z0.2 F600\nG1 X120 Y0 E15 F{filament_max_volumetric_speed[initial_extruder]/0.3*60*0.1}\nG1 X115 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG1 X110 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)*60}\nG1 X105 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG1 X100 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)*60}\nG1 X95 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG91\nG1 X-1 Z0.1\nG1 X-4\nG92 E0",
+ 	"machine_tool_change_time": "0",
+ 	"machine_unload_filament_time": "30",
+ 	"manual_filament_change": "0",
+diff --git a/resources/profiles/Creality/machine/Creality SPARKX i7 0.4 nozzle.json b/resources/profiles/Creality/machine/Creality SPARKX i7 0.4 nozzle.json
+index 34f9781..6b8a09e 100644
+--- a/resources/profiles/Creality/machine/Creality SPARKX i7 0.4 nozzle.json	
++++ b/resources/profiles/Creality/machine/Creality SPARKX i7 0.4 nozzle.json	
+@@ -59,7 +59,7 @@
+ 	"machine_pause_gcode": "PAUSE",
+ 	"machine_platform_motion_enable": "0",
+ 	"machine_ptc_exist": "0",
+-	"machine_start_gcode": "M140 S0\nM104 S0 \nSTART_PRINT EXTRUDER_TEMP=[nozzle_temperature_initial_layer] BED_TEMP=[bed_temperature_initial_layer_single]\nM83 \nM8200 P S[initial_no_support_extruder]\nM220 S100\n\nSET_VELOCITY_LIMIT ACCEL=5000 ACCEL_TO_DECEL=5000\nG0 X267 F18000 \nG0 X278 F2400\nM109 S[nozzle_temperature_initial_layer]\nM106 S0\nT[initial_no_support_extruder]\n\nM8200 O\nM204 S2000\nG1 Z3 F600\nM83\nG1 Y0 F12000\nG1 X150 F30000\nG1 Z0.2 F600\nG1 X120 Y0 E15 F{filament_max_volumetric_speed[initial_extruder]/0.3*60*0.1}\nG1 X115 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG1 X110 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)*60}\nG1 X105 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG1 X100 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)*60}\nG1 X95 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG91\nG1 X-1 Z-0.3\nG1 X-4\nG92 E0",
++	"machine_start_gcode": "M140 S0\nM104 S0 \nSTART_PRINT EXTRUDER_TEMP=[nozzle_temperature_initial_layer] BED_TEMP=[bed_temperature_initial_layer_single]\nM83 \nM8200 P S[initial_no_support_extruder]\nM220 S100\n\nSET_VELOCITY_LIMIT ACCEL=5000 ACCEL_TO_DECEL=5000\nG0 X267 F18000 \nG0 X278 F2400\nM109 S[nozzle_temperature_initial_layer]\nM106 S0\nT[initial_no_support_extruder]\n\nM8200 O\nM204 S2000\nG1 Z3 F600\nM83\nG1 Y0 F12000\nG1 X150 F30000\nG1 Z0.2 F600\nG1 X120 Y0 E15 F{filament_max_volumetric_speed[initial_extruder]/0.3*60*0.1}\nG1 X115 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG1 X110 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)*60}\nG1 X105 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG1 X100 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)*60}\nG1 X95 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG91\nG1 X-1 Z0.1\nG1 X-4\nG92 E0",
+ 	"machine_tool_change_time": "0",
+ 	"machine_unload_filament_time": "30",
+ 	"manual_filament_change": "0",
+diff --git a/resources/profiles/Creality/machine/Creality SPARKX i7 0.6 nozzle.json b/resources/profiles/Creality/machine/Creality SPARKX i7 0.6 nozzle.json
+index 406e50f..6d393bd 100644
+--- a/resources/profiles/Creality/machine/Creality SPARKX i7 0.6 nozzle.json	
++++ b/resources/profiles/Creality/machine/Creality SPARKX i7 0.6 nozzle.json	
+@@ -59,7 +59,7 @@
+ 	"machine_pause_gcode": "PAUSE",
+ 	"machine_platform_motion_enable": "0",
+ 	"machine_ptc_exist": "0",
+-	"machine_start_gcode": "M140 S0\nM104 S0 \nSTART_PRINT EXTRUDER_TEMP=[nozzle_temperature_initial_layer] BED_TEMP=[bed_temperature_initial_layer_single]\nM83 \nM8200 P S[initial_no_support_extruder]\nM220 S100\n\nSET_VELOCITY_LIMIT ACCEL=5000 ACCEL_TO_DECEL=5000\nG0 X267 F18000 \nG0 X278 F2400\nM109 S[nozzle_temperature_initial_layer]\nM106 S0\nT[initial_no_support_extruder]\n\nM8200 O\nM204 S2000\nG1 Z3 F600\nM83\nG1 Y0 F12000\nG1 X150 F30000\nG1 Z0.2 F600\nG1 X120 Y0 E15 F{filament_max_volumetric_speed[initial_extruder]/0.3*60*0.1}\nG1 X115 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG1 X110 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)*60}\nG1 X105 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG1 X100 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)*60}\nG1 X95 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG91\nG1 X-1 Z-0.3\nG1 X-4\nG92 E0",
++	"machine_start_gcode": "M140 S0\nM104 S0 \nSTART_PRINT EXTRUDER_TEMP=[nozzle_temperature_initial_layer] BED_TEMP=[bed_temperature_initial_layer_single]\nM83 \nM8200 P S[initial_no_support_extruder]\nM220 S100\n\nSET_VELOCITY_LIMIT ACCEL=5000 ACCEL_TO_DECEL=5000\nG0 X267 F18000 \nG0 X278 F2400\nM109 S[nozzle_temperature_initial_layer]\nM106 S0\nT[initial_no_support_extruder]\n\nM8200 O\nM204 S2000\nG1 Z3 F600\nM83\nG1 Y0 F12000\nG1 X150 F30000\nG1 Z0.2 F600\nG1 X120 Y0 E15 F{filament_max_volumetric_speed[initial_extruder]/0.3*60*0.1}\nG1 X115 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG1 X110 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)*60}\nG1 X105 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG1 X100 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)*60}\nG1 X95 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG91\nG1 X-1 Z0.1\nG1 X-4\nG92 E0",
+ 	"machine_tool_change_time": "0",
+ 	"machine_unload_filament_time": "30",
+ 	"manual_filament_change": "0",
+diff --git a/resources/profiles/Creality/machine/Creality SPARKX i7 0.8 nozzle.json b/resources/profiles/Creality/machine/Creality SPARKX i7 0.8 nozzle.json
+index 0c4e269..5991ed0 100644
+--- a/resources/profiles/Creality/machine/Creality SPARKX i7 0.8 nozzle.json	
++++ b/resources/profiles/Creality/machine/Creality SPARKX i7 0.8 nozzle.json	
+@@ -59,7 +59,7 @@
+ 	"machine_pause_gcode": "PAUSE",
+ 	"machine_platform_motion_enable": "0",
+ 	"machine_ptc_exist": "0",
+-	"machine_start_gcode": "M140 S0\nM104 S0 \nSTART_PRINT EXTRUDER_TEMP=[nozzle_temperature_initial_layer] BED_TEMP=[bed_temperature_initial_layer_single]\nM83 \nM8200 P S[initial_no_support_extruder]\nM220 S100\n\nSET_VELOCITY_LIMIT ACCEL=5000 ACCEL_TO_DECEL=5000\nG0 X267 F18000 \nG0 X278 F2400\nM109 S[nozzle_temperature_initial_layer]\nM106 S0\nT[initial_no_support_extruder]\n\nM8200 O\nM204 S2000\nG1 Z3 F600\nM83\nG1 Y0 F12000\nG1 X150 F30000\nG1 Z0.2 F600\nG1 X120 Y0 E15 F{filament_max_volumetric_speed[initial_extruder]/0.3*60*0.1}\nG1 X115 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG1 X110 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)*60}\nG1 X105 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG1 X100 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)*60}\nG1 X95 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG91\nG1 X-1 Z-0.3\nG1 X-4\nG92 E0",
++	"machine_start_gcode": "M140 S0\nM104 S0 \nSTART_PRINT EXTRUDER_TEMP=[nozzle_temperature_initial_layer] BED_TEMP=[bed_temperature_initial_layer_single]\nM83 \nM8200 P S[initial_no_support_extruder]\nM220 S100\n\nSET_VELOCITY_LIMIT ACCEL=5000 ACCEL_TO_DECEL=5000\nG0 X267 F18000 \nG0 X278 F2400\nM109 S[nozzle_temperature_initial_layer]\nM106 S0\nT[initial_no_support_extruder]\n\nM8200 O\nM204 S2000\nG1 Z3 F600\nM83\nG1 Y0 F12000\nG1 X150 F30000\nG1 Z0.2 F600\nG1 X120 Y0 E15 F{filament_max_volumetric_speed[initial_extruder]/0.3*60*0.1}\nG1 X115 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG1 X110 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)*60}\nG1 X105 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG1 X100 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)*60}\nG1 X95 E.3742  F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}\nG91\nG1 X-1 Z0.1\nG1 X-4\nG92 E0",
+ 	"machine_tool_change_time": "0",
+ 	"machine_unload_filament_time": "30",
+ 	"manual_filament_change": "0",
+-- 
+2.51.1
+
