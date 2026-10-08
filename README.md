@@ -12,7 +12,7 @@ VORMETRA Slice makes the software assumptions behind a large-format pellet extru
 
 | Layer | Current evidence | Boundary |
 |---|---|---|
-| Portable Python | 31 tests pass without a slicer binary; 3 dependency-bound tests skip visibly | Does not compile or execute the C++ desktop app |
+| Portable Python | 33 tests pass without a slicer binary; 3 dependency-bound tests skip visibly | Does not compile or execute the C++ desktop app |
 | Real slicer CLI | The current repository profile slices a 200 × 200 × 100 mm fixture through a locally available OrcaSlicer v2.4.2 binary | Uses an external binary; it is not a repository release asset |
 | LinuxCNC conversion | The generated Marlin-flavor G-code passes the explicitly configured converter integration test | Converter is an optional external dependency |
 | Physical machine | No commissioning, throughput, accuracy, surface-quality, or endurance result is asserted | Requires controlled physical testing |
@@ -32,6 +32,12 @@ python examples/portable_validation.py
 ```
 
 The portable commands are non-destructive and do not require the C++ desktop application. The demo generates a temporary 200 x 200 x 100 mm fixture, validates it through the public Python layer and removes it. Tests that need `VERA_SLICER_BIN` or `VERA_FGF_POST_PATH` report a skip when the dependency is not configured; a skip is not a pass for that evidence layer.
+
+[![Portable validation result showing that the generated 200 by 200 by 100 millimetre fixture fits the configured G1000 software envelope, with no slicer or physical-machine claim](docs/portable-validation-proof.svg)](vera-control/examples/portable_validation.py)
+
+The proof above is generated from the demo's JSON report and checked against
+that report in the portable test suite. Regenerate it from `vera-control/` with
+`python examples/portable_validation.py --proof-svg ../docs/portable-validation-proof.svg`.
 
 ## Architecture
 
