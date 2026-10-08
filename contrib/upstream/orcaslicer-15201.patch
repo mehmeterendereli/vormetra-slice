@@ -1,17 +1,17 @@
-From ae49cb4717a8059a89a3429adeebe70d4437dc34 Mon Sep 17 00:00:00 2001
-From: Codex <codex@openai.com>
-Date: Thu, 8 Oct 2026 19:05:58 +0300
-Subject: [PATCH] fix: lift SparkX nozzle after purge line
-
----
- .../Creality/machine/Creality SPARKX i7 0.2 nozzle.json         | 2 +-
- .../Creality/machine/Creality SPARKX i7 0.4 nozzle.json         | 2 +-
- .../Creality/machine/Creality SPARKX i7 0.6 nozzle.json         | 2 +-
- .../Creality/machine/Creality SPARKX i7 0.8 nozzle.json         | 2 +-
- 4 files changed, 4 insertions(+), 4 deletions(-)
-
+diff --git a/resources/profiles/Creality.json b/resources/profiles/Creality.json
+index e2fbd27dc1abb96d34942b9e68f687ed5c0bbb50..e7ddd66e6b223351795159098c697c0f35cb5de7 100644
+--- a/resources/profiles/Creality.json
++++ b/resources/profiles/Creality.json
+@@ -1,6 +1,6 @@
+ {
+ 	"name": "Creality",
+-	"version": "02.03.02.87",
++	"version": "02.03.02.88",
+ 	"force_update": "0",
+ 	"description": "Creality configurations",
+ 	"machine_model_list": [
 diff --git a/resources/profiles/Creality/machine/Creality SPARKX i7 0.2 nozzle.json b/resources/profiles/Creality/machine/Creality SPARKX i7 0.2 nozzle.json
-index 8f622d0..8211c54 100644
+index 8f622d072d97a12e8e91c0177f48e4e9c64bfa01..8211c543abad428ebf2749b90665653684d879b4 100644
 --- a/resources/profiles/Creality/machine/Creality SPARKX i7 0.2 nozzle.json	
 +++ b/resources/profiles/Creality/machine/Creality SPARKX i7 0.2 nozzle.json	
 @@ -59,7 +59,7 @@
@@ -24,7 +24,7 @@ index 8f622d0..8211c54 100644
  	"machine_unload_filament_time": "30",
  	"manual_filament_change": "0",
 diff --git a/resources/profiles/Creality/machine/Creality SPARKX i7 0.4 nozzle.json b/resources/profiles/Creality/machine/Creality SPARKX i7 0.4 nozzle.json
-index 34f9781..6b8a09e 100644
+index 34f9781bab611fd768c93a8b690f4dc15ac58cc7..6b8a09e3d7111bf1225a38cade926357b437de57 100644
 --- a/resources/profiles/Creality/machine/Creality SPARKX i7 0.4 nozzle.json	
 +++ b/resources/profiles/Creality/machine/Creality SPARKX i7 0.4 nozzle.json	
 @@ -59,7 +59,7 @@
@@ -37,7 +37,7 @@ index 34f9781..6b8a09e 100644
  	"machine_unload_filament_time": "30",
  	"manual_filament_change": "0",
 diff --git a/resources/profiles/Creality/machine/Creality SPARKX i7 0.6 nozzle.json b/resources/profiles/Creality/machine/Creality SPARKX i7 0.6 nozzle.json
-index 406e50f..6d393bd 100644
+index 406e50f45f66d06365b270f38b50a213cc47e4d1..6d393bd1149f3ba4a1c6643743931e5ec0bce72b 100644
 --- a/resources/profiles/Creality/machine/Creality SPARKX i7 0.6 nozzle.json	
 +++ b/resources/profiles/Creality/machine/Creality SPARKX i7 0.6 nozzle.json	
 @@ -59,7 +59,7 @@
@@ -50,7 +50,7 @@ index 406e50f..6d393bd 100644
  	"machine_unload_filament_time": "30",
  	"manual_filament_change": "0",
 diff --git a/resources/profiles/Creality/machine/Creality SPARKX i7 0.8 nozzle.json b/resources/profiles/Creality/machine/Creality SPARKX i7 0.8 nozzle.json
-index 0c4e269..5991ed0 100644
+index 0c4e269ea0e8cb3e05eca45b2dace34e264da811..5991ed0f18470298d4b468ebddf2b49b4b92d82e 100644
 --- a/resources/profiles/Creality/machine/Creality SPARKX i7 0.8 nozzle.json	
 +++ b/resources/profiles/Creality/machine/Creality SPARKX i7 0.8 nozzle.json	
 @@ -59,7 +59,7 @@
@@ -62,6 +62,3 @@ index 0c4e269..5991ed0 100644
  	"machine_tool_change_time": "0",
  	"machine_unload_filament_time": "30",
  	"manual_filament_change": "0",
--- 
-2.51.1
-
