@@ -1,0 +1,83 @@
+From 337552190cf3d1eae4c0fa53f6f7e10ea5307c25 Mon Sep 17 00:00:00 2001
+From: Codex <codex@openai.com>
+Date: Thu, 8 Oct 2026 17:05:58 +0300
+Subject: [PATCH] fix: align nozzle labels with gcode tool ids
+
+---
+ src/slic3r/GUI/GCodeToolLabel.hpp           | 15 +++++++++++++++
+ src/slic3r/GUI/Plater.cpp                   |  3 ++-
+ tests/slic3rutils/CMakeLists.txt            |  1 +
+ tests/slic3rutils/test_gcode_tool_label.cpp | 11 +++++++++++
+ 4 files changed, 29 insertions(+), 1 deletion(-)
+ create mode 100644 src/slic3r/GUI/GCodeToolLabel.hpp
+ create mode 100644 tests/slic3rutils/test_gcode_tool_label.cpp
+
+diff --git a/src/slic3r/GUI/GCodeToolLabel.hpp b/src/slic3r/GUI/GCodeToolLabel.hpp
+new file mode 100644
+index 0000000..d2c68d2
+--- /dev/null
++++ b/src/slic3r/GUI/GCodeToolLabel.hpp
+@@ -0,0 +1,15 @@
++#pragma once
++
++#include <cstddef>
++#include <string>
++
++namespace Slic3r {
++namespace GUI {
++
++inline std::string gcode_tool_label(size_t zero_based_tool_index)
++{
++    return "T" + std::to_string(zero_based_tool_index);
++}
++
++} // namespace GUI
++} // namespace Slic3r
+diff --git a/src/slic3r/GUI/Plater.cpp b/src/slic3r/GUI/Plater.cpp
+index 15c8077..15e827a 100644
+--- a/src/slic3r/GUI/Plater.cpp
++++ b/src/slic3r/GUI/Plater.cpp
+@@ -1,4 +1,5 @@
+ #include "Plater.hpp"
++#include "GCodeToolLabel.hpp"
+ #include "../Utils/NetworkAgent.hpp"
+ #include "IPrinterAgent.hpp"
+ #include "CalibUtils.hpp"
+@@ -1652,7 +1653,7 @@ ExtruderGroup::NozzleRow ExtruderGroup::create_nozzle_row()
+ 
+     row.prefix = new Label(this, Label::Body_10.Bold());
+     row.prefix->SetForegroundColour(StateColor::darkModeColorFor(wxColour("#363636")));
+-    row.prefix->SetLabelText(wxString::Format("T%d", int(row_index) + 1));
++    row.prefix->SetLabelText(from_u8(gcode_tool_label(row_index)));
+     row.prefix->Hide();
+ 
+     row.diameter_label = new Label(this, Label::Body_10);
+diff --git a/tests/slic3rutils/CMakeLists.txt b/tests/slic3rutils/CMakeLists.txt
+index 97a2828..6d17e87 100644
+--- a/tests/slic3rutils/CMakeLists.txt
++++ b/tests/slic3rutils/CMakeLists.txt
+@@ -3,6 +3,7 @@ add_executable(${_TEST_NAME}_tests
+     ${_TEST_NAME}_tests_main.cpp
+     test_bambu_filament_ids.cpp
+     test_config_value_formatter.cpp
++    test_gcode_tool_label.cpp
+     test_creality_cfs_match.cpp
+     test_dev_mapping.cpp
+     test_filament_bitmap_utils.cpp
+diff --git a/tests/slic3rutils/test_gcode_tool_label.cpp b/tests/slic3rutils/test_gcode_tool_label.cpp
+new file mode 100644
+index 0000000..d592b6f
+--- /dev/null
++++ b/tests/slic3rutils/test_gcode_tool_label.cpp
+@@ -0,0 +1,11 @@
++#include <catch2/catch_test_macros.hpp>
++
++#include "slic3r/GUI/GCodeToolLabel.hpp"
++
++using namespace Slic3r::GUI;
++
++TEST_CASE("Nozzle row labels use zero-based G-code tool ids", "[GCodeToolLabel][Regression]")
++{
++    CHECK(gcode_tool_label(0) == "T0");
++    CHECK(gcode_tool_label(3) == "T3");
++}
